@@ -1,0 +1,21 @@
+{
+  "name": "@openmascot/embed",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Framework-free mascot embed runtime. One script tag, one JSON file.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./demo/mascot.json": "./demo/mascot.json",
+    "./samples/*": "./samples/*"
+  },
+  "scripts": {
+    "build": "esbuild src/embed.ts --bundle --format=iife --target=es2018 --outfile=dist/embed.js",
+    "demo": "pnpm build && python3 -m http.server 4311 --directory .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5"
+  }
+}
