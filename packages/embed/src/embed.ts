@@ -9,7 +9,7 @@ import type { MascotDoc, MascotOptions, MascotPosition } from "./types";
  * Without data-position the mascot renders inline where the div sits.
  * From page code: Mascot.play("celebrate") or Mascot.emit("success").
  */
-import { MascotPlayer } from "./runtime";
+import { MascotPlayer } from "./player";
 
 declare global {
   interface Window {

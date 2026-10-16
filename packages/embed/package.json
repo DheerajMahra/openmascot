@@ -12,10 +12,12 @@
   "scripts": {
     "build": "esbuild src/embed.ts --bundle --format=iife --target=es2018 --outfile=dist/embed.js",
     "demo": "pnpm build && python3 -m http.server 4311 --directory .",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "esbuild": "^0.25.0",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.5"
   }
 }
