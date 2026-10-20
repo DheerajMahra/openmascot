@@ -12,6 +12,14 @@
   --color-clay-tint: #fdf3ee;
   --color-stage: #141413;
   --color-stage-text: #a39b90;
+  --color-ink-soft: #3d3833;
+  --color-code-fg: #f1ece4;
+  --color-board: #f6f2ec;
+  --color-board-grid: #e3dcd2;
+  --color-success: #4a7d2c;
+  --color-success-dot: #599036;
+  --color-warning: #9a6a12;
+  --color-warning-dot: #d49a2a;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

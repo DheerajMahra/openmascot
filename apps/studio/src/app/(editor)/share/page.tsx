@@ -1,7 +1,5 @@
-"use client";
-
-import { SharePanel } from "@/components/share/share-panel";
+import { ShareScreen } from "@/features/share/share-screen";
 
 export default function SharePage() {
-  return <SharePanel />;
+  return <ShareScreen />;
 }

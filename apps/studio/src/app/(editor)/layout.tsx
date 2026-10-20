@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-import { AppHeader } from "@/components/app-header";
-import { Stepper } from "@/components/stepper";
+import { AppHeader } from "@/components/layout/app-header";
+import { Stepper } from "@/components/layout/stepper";
 
 /** Header + stepper around the three editor screens. */
 export default function EditorLayout({ children }: { children: ReactNode }) {
