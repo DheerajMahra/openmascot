@@ -6,15 +6,16 @@ import { MascotThumb } from "@/components/mascot/mascot-thumb";
 import { Button } from "@/components/ui/button";
 import { InfoTip } from "@/components/ui/info-tip";
 import { SectionLabel } from "@/components/ui/section-label";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDispatch, useMascotDoc } from "@/lib/mascot-store";
 
 const POSES_HELP =
   "A pose is one drawing of your mascot. Moves switch between poses. A new pose starts as a copy of default, so change only what differs: eyes, arms, mouth.";
 
 /** Every pose with a thumbnail; pick one to draw on it. */
 export const PoseList = () => {
-  const { state, dispatch } = useMascot();
-  const { doc, poseName } = state;
+  const dispatch = useMascotDispatch();
+  const doc = useMascotDoc();
+  const { poseName } = useEditorSelection();
 
   const addPose = () => {
     const name = window.prompt("Name the new pose:", "")?.trim();

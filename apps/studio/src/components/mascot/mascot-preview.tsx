@@ -6,11 +6,9 @@ import type { RefObject } from "react";
 import { MascotPlayer } from "@openmascot/embed";
 import { useEffect, useRef, useState } from "react";
 
-import { useMascot } from "@/lib/mascot-store";
-
 interface Props {
-  /** Document to play. Defaults to the one being edited. */
-  doc?: MascotDoc;
+  /** Document to play. Later changes are pushed to the running player. */
+  doc: MascotDoc;
   scale?: number;
   /** Wire click, hover and interval triggers from the doc. */
   triggers?: boolean;
@@ -21,12 +19,10 @@ interface Props {
 
 /** Mounts the real embed runtime so the studio previews exactly what a site will show. */
 export const MascotPreview = ({ doc, scale = 8, triggers = true, playerRef, className }: Props) => {
-  const { state } = useMascot();
-  const current = doc ?? state.doc;
   const hostRef = useRef<HTMLDivElement>(null);
   const localRef = useRef<MascotPlayerType | null>(null);
   // The doc at mount time. The second effect keeps the player current after that.
-  const [initialDoc] = useState(current);
+  const [initialDoc] = useState(doc);
 
   useEffect(() => {
     const el = hostRef.current;
@@ -42,8 +38,8 @@ export const MascotPreview = ({ doc, scale = 8, triggers = true, playerRef, clas
   }, [initialDoc, scale, triggers, playerRef]);
 
   useEffect(() => {
-    localRef.current?.setDoc(current);
-  }, [current]);
+    localRef.current?.setDoc(doc);
+  }, [doc]);
 
   return <div ref={hostRef} className={className} />;
 };

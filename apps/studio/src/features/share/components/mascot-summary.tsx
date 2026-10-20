@@ -1,13 +1,13 @@
 "use client";
 
+import type { MascotDoc } from "@openmascot/embed";
+
 import { MascotStage } from "@/components/mascot/mascot-stage";
 import { MascotThumb } from "@/components/mascot/mascot-thumb";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { useMascot } from "@/lib/mascot-store";
 
 /** Big picture, name, counts, and whether the mascot is complete enough to embed. */
-export const MascotSummary = () => {
-  const { doc } = useMascot().state;
+export const MascotSummary = ({ doc }: { doc: MascotDoc }) => {
   const poses = Object.keys(doc.poses);
   const idle = doc.triggers.idle ?? "idle";
   const ready = idle in doc.sequences && poses.length > 0;

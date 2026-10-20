@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GridTable, GridTableEmpty, GridTableHeader } from "@/components/ui/grid-table";
 import { SectionLabel } from "@/components/ui/section-label";
 import { TriggerRow } from "@/features/animate/components/trigger-row";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 
 const TRIGGER_COLUMNS = "18px minmax(150px,1fr) 140px minmax(150px,1fr) 28px";
 
@@ -13,9 +13,10 @@ const TRIGGER_COLUMNS = "18px minmax(150px,1fr) 140px minmax(150px,1fr) 28px";
  * Each "when" is a key of doc.triggers, so no two rows share one.
  */
 export const TriggersTable = () => {
-  const { state, dispatch } = useMascot();
-  const { doc, seqName } = state;
-  const rows = Object.entries(doc.triggers).filter(([key]) => key !== "idle");
+  const dispatch = useMascotDispatch();
+  const { seqName } = useEditorSelection();
+  const triggers = useMascotSelector(s => s.doc.triggers);
+  const rows = Object.entries(triggers).filter(([key]) => key !== "idle");
 
   return (
     <div className="flex flex-col gap-2.5 border-t border-line pt-4">

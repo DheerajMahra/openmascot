@@ -1,6 +1,6 @@
 "use client";
 
-import type { MascotFrame } from "@openmascot/embed";
+import type { MascotDoc, MascotFrame } from "@openmascot/embed";
 import type { HTMLAttributes } from "react";
 
 import { MascotStage } from "@/components/mascot/mascot-stage";
@@ -11,10 +11,11 @@ import { CloseIcon, GripIcon } from "@/components/ui/icons";
 import { Select } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { holdOf } from "@/features/animate/lib/timeline";
-import { useMascot } from "@/lib/mascot-store";
 import { cn } from "@/lib/utils";
 
 interface Props {
+  /** Mascot the step belongs to, for the thumbnail and the grid bounds. */
+  doc: MascotDoc;
   index: number;
   frame: MascotFrame;
   poses: string[];
@@ -32,6 +33,7 @@ interface Props {
 
 /** One step of a move: which pose, for how long, and how far it's nudged. */
 export const StepRow = ({
+  doc,
   index,
   frame,
   poses,
@@ -44,8 +46,6 @@ export const StepRow = ({
   onChange,
   onRemove
 }: Props) => {
-  const { state } = useMascot();
-  const { doc } = state;
   const n = index + 1;
 
   return (

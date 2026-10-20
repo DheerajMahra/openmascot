@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
 
-import { Logo } from "@/components/layout/logo";
+import { CurrentMascotLogo } from "@/components/layout/logo";
 
 /** Top bar: the logo, then anything passed in (pushed right with ml-auto). */
 export const AppHeader = ({ children }: { children?: ReactNode }) => (
   <header className="flex h-14 items-center gap-4 border-b border-line px-6">
-    <Logo />
+    <CurrentMascotLogo />
     {children}
   </header>
 );

@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 
-import { useMascot } from "@/lib/mascot-store";
+import { useMascotDispatch } from "@/lib/mascot-store";
 
 const TYPING = ["INPUT", "TEXTAREA", "SELECT"];
 
 /** ⌘Z / Ctrl+Z undoes, with Shift redoes, unless the user is typing in a field. */
 export const useUndoShortcuts = () => {
-  const { dispatch } = useMascot();
+  const dispatch = useMascotDispatch();
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;

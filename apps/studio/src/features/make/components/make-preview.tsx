@@ -10,12 +10,11 @@ import { MascotPreview } from "@/components/mascot/mascot-preview";
 import { MascotStage } from "@/components/mascot/mascot-stage";
 import { Pill } from "@/components/ui/pill";
 import { SectionLabel } from "@/components/ui/section-label";
-import { useMascot } from "@/lib/mascot-store";
+import { useMascotDoc } from "@/lib/mascot-store";
 
 /** Right column of Make: the live mascot, a way to try moves, and Next. */
 export const MakePreview = () => {
-  const { state } = useMascot();
-  const { doc } = state;
+  const doc = useMascotDoc();
   const playerRef = useRef<MascotPlayer | null>(null);
   const idle = doc.triggers.idle ?? "idle";
   const moves = Object.keys(doc.sequences).filter(name => name !== idle);
@@ -24,7 +23,7 @@ export const MakePreview = () => {
     <EditorPreviewPanel aria-label="Live preview">
       <SectionLabel>Preview</SectionLabel>
       <MascotStage className="h-[280px]">
-        <MascotPreview scale={8} playerRef={playerRef} />
+        <MascotPreview doc={doc} scale={8} playerRef={playerRef} />
       </MascotStage>
       <div className="flex flex-col gap-1">
         <span className="text-sm font-semibold">Try a move</span>

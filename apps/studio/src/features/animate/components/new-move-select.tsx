@@ -1,15 +1,16 @@
 "use client";
 
 import { Select } from "@/components/ui/input";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 import { MOVE_PRESETS } from "@/lib/presets";
 
 const DUPLICATE = "duplicate";
 
 /** "+ New move…" picker: a preset, a copy of the current move, or an empty one. */
 export const NewMoveSelect = () => {
-  const { state, dispatch } = useMascot();
-  const { doc, seqName } = state;
+  const dispatch = useMascotDispatch();
+  const { seqName } = useEditorSelection();
+  const poses = useMascotSelector(s => s.doc.poses);
 
   const addMove = (id: string) => {
     if (id === DUPLICATE) {
@@ -19,7 +20,7 @@ export const NewMoveSelect = () => {
     const preset = MOVE_PRESETS.find(p => p.id === id);
     if (!preset) return;
     const name = id === "empty" ? "new-move" : id;
-    dispatch({ type: "add-seq", name, frames: preset.build(Object.keys(doc.poses)) });
+    dispatch({ type: "add-seq", name, frames: preset.build(Object.keys(poses)) });
   };
 
   return (

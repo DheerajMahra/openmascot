@@ -1,10 +1,17 @@
 "use client";
 
 import type { MascotDoc, MascotFrame } from "@openmascot/embed";
-import type { Dispatch, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import blobbyJson from "@openmascot/embed/demo/mascot.json";
-import { createContext, useContext, useEffect, useReducer, useRef } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore
+} from "react";
 
 import { blankPose, floodFill, newId, normalizePose, setCell } from "@/lib/pose-utils";
 import { loadCurrent, saveCurrent } from "@/lib/storage";
@@ -348,15 +355,43 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
   }
 };
 
-interface MascotContextValue {
-  state: MascotState;
-  dispatch: Dispatch<MascotAction>;
+export interface MascotStore {
+  getState: () => MascotState;
+  dispatch: (action: MascotAction) => void;
+  subscribe: (listener: () => void) => () => void;
 }
 
-const MascotContext = createContext<MascotContextValue | null>(null);
+/** A tiny external store around the reducer, so components can subscribe to just the slice they read. */
+export const createMascotStore = (initial: MascotState = initialState): MascotStore => {
+  let state = initial;
+  const listeners = new Set<() => void>();
+  return {
+    getState: () => state,
+    dispatch: action => {
+      const next = reducer(state, action);
+      if (next === state) return;
+      state = next;
+      for (const listener of listeners) listener();
+    },
+    subscribe: listener => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    }
+  };
+};
+
+/** Subscribes to one slice. The selector must return something stable: a primitive or a part of the state, never a fresh object. */
+const useStoreSelector = <T,>(store: MascotStore, selector: (s: MascotState) => T): T => {
+  const getSnapshot = () => selector(store.getState());
+  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+};
+
+const MascotStoreContext = createContext<MascotStore | null>(null);
 
 export const MascotProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [store] = useState(createMascotStore);
+  const doc = useStoreSelector(store, s => s.doc);
+  const hydrated = useStoreSelector(store, s => s.hydrated);
 
   // The doc that came out of storage; saving it back would fake an "edited just now".
   const hydratedDoc = useRef<MascotDoc | null>(null);
@@ -364,19 +399,51 @@ export const MascotProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const stored = loadCurrent();
     hydratedDoc.current = stored;
-    dispatch({ type: "hydrate", doc: stored });
-  }, []);
+    store.dispatch({ type: "hydrate", doc: stored });
+  }, [store]);
 
   useEffect(() => {
-    if (!state.hydrated || state.doc === hydratedDoc.current) return;
-    saveCurrent(state.doc);
-  }, [state.doc, state.hydrated]);
+    if (!hydrated || doc === hydratedDoc.current) return;
+    saveCurrent(doc);
+  }, [doc, hydrated]);
 
-  return <MascotContext.Provider value={{ state, dispatch }}>{children}</MascotContext.Provider>;
+  return <MascotStoreContext.Provider value={store}>{children}</MascotStoreContext.Provider>;
 };
 
-export const useMascot = (): MascotContextValue => {
-  const ctx = useContext(MascotContext);
-  if (!ctx) throw new Error("useMascot must be used inside MascotProvider");
-  return ctx;
+const useMascotStore = (): MascotStore => {
+  const store = useContext(MascotStoreContext);
+  if (!store) throw new Error("Mascot hooks must be used inside MascotProvider");
+  return store;
 };
+
+/** Re-renders only when the selected value changes. See useStoreSelector for the stability rule. */
+export const useMascotSelector = <T,>(selector: (s: MascotState) => T): T =>
+  useStoreSelector(useMascotStore(), selector);
+
+/** Stable for the life of the provider. */
+export const useMascotDispatch = (): MascotStore["dispatch"] => useMascotStore().dispatch;
+
+/** The mascot being edited. */
+export const useMascotDoc = (): MascotDoc => useMascotSelector(s => s.doc);
+
+/** Whether the saved mascot has been loaded from this browser yet. */
+export const useMascotHydrated = (): boolean => useMascotSelector(s => s.hydrated);
+
+/** The pose open on Make and the move open on Animate. */
+export const useEditorSelection = (): { poseName: string; seqName: string } => ({
+  poseName: useMascotSelector(s => s.poseName),
+  seqName: useMascotSelector(s => s.seqName)
+});
+
+/** What a click on the board does: the tool and the color it paints with. */
+export const useEditorTool = (): { tool: Tool; colorIndex: number } => ({
+  tool: useMascotSelector(s => s.tool),
+  colorIndex: useMascotSelector(s => s.colorIndex)
+});
+
+export const useBoardOptions = (): BoardOptions => useMascotSelector(s => s.board);
+
+export const useUndoAvailability = (): { canUndo: boolean; canRedo: boolean } => ({
+  canUndo: useMascotSelector(s => s.history.length > 0),
+  canRedo: useMascotSelector(s => s.future.length > 0)
+});

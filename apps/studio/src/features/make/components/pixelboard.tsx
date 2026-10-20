@@ -5,7 +5,13 @@ import type { PointerEvent } from "react";
 import { EMPTY_CELL } from "@openmascot/embed";
 import { useEffect, useRef } from "react";
 
-import { useMascot } from "@/lib/mascot-store";
+import {
+  useBoardOptions,
+  useEditorSelection,
+  useEditorTool,
+  useMascotDispatch,
+  useMascotDoc
+} from "@/lib/mascot-store";
 import { colorChar, normalizePose } from "@/lib/pose-utils";
 import { cn } from "@/lib/utils";
 
@@ -16,8 +22,11 @@ const CENTER = "#a39b90";
 
 /** The drawing surface. Grid always on; center lines are the middle grid lines drawn dotted. */
 export const Pixelboard = () => {
-  const { state, dispatch } = useMascot();
-  const { doc, poseName, tool, colorIndex, board } = state;
+  const dispatch = useMascotDispatch();
+  const doc = useMascotDoc();
+  const { poseName } = useEditorSelection();
+  const { tool, colorIndex } = useEditorTool();
+  const board = useBoardOptions();
   const { w, h } = doc.grid;
   const pose = normalizePose(doc.poses[poseName] ?? "", w, h);
   const canvasRef = useRef<HTMLCanvasElement>(null);
