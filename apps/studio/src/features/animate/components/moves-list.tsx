@@ -33,7 +33,7 @@ export const MovesList = () => {
         Moves
         <InfoTip label="About moves" text={MOVES_HELP} />
       </SectionLabel>
-      <div className="flex flex-col gap-2">
+      <div className="flex min-h-0 flex-col gap-2 overflow-y-auto pr-0.5">
         {Object.keys(doc.sequences).map(name => (
           <SelectableItem
             key={name}

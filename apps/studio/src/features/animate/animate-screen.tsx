@@ -4,7 +4,7 @@ import type { MascotPlayer } from "@openmascot/embed";
 
 import { useRef, useState } from "react";
 
-import { EditorWorkspace } from "@/components/layout/editor-shell";
+import { EditorColumns, EditorWorkspace } from "@/components/layout/editor-shell";
 import { MoveHeader } from "@/features/animate/components/move-header";
 import { MovePreview } from "@/features/animate/components/move-preview";
 import { MovesList } from "@/features/animate/components/moves-list";
@@ -36,14 +36,16 @@ export const AnimateScreen = () => {
   };
 
   return (
-    <>
-      <MovesList />
-      <EditorWorkspace aria-label={`The ${seqName} move`}>
-        <MoveHeader />
-        <StepTable activeStep={live ?? selected} onSelectStep={selectStep} />
-        <TriggersTable />
-      </EditorWorkspace>
-      <MovePreview playerRef={playerRef} onPlay={play} />
-    </>
+    <EditorColumns
+      sidebar={<MovesList />}
+      workspace={
+        <EditorWorkspace aria-label={`The ${seqName} move`}>
+          <MoveHeader />
+          <StepTable activeStep={live ?? selected} onSelectStep={selectStep} />
+          <TriggersTable />
+        </EditorWorkspace>
+      }
+      preview={<MovePreview playerRef={playerRef} onPlay={play} />}
+    />
   );
 };

@@ -58,7 +58,7 @@ export const PalettePicker = () => {
   return (
     <>
       <SectionLabel>Colors</SectionLabel>
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="flex flex-wrap gap-1.5">
         {palette.map((hex, i) => {
           const selected = i === colorIndex;
           return (
@@ -72,7 +72,7 @@ export const PalettePicker = () => {
               onClick={e => onSwatchClick(e, i)}
               onChange={e => onPick(e.target.value, i)}
               className={cn(
-                "h-9 w-full cursor-pointer rounded-md p-0",
+                "size-9 shrink-0 cursor-pointer rounded-md p-0",
                 selected
                   ? "border-2 border-ink shadow-[0_0_0_2px_var(--color-paper),0_0_0_3px_var(--color-ink)]"
                   : "border border-line"
@@ -84,7 +84,7 @@ export const PalettePicker = () => {
         {palette.length < MAX_COLORS && (
           <label
             title="Add a color"
-            className="relative flex h-9 cursor-pointer items-center justify-center rounded-md border border-dashed border-stage-text bg-paper text-lg text-muted hover:border-clay"
+            className="relative flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-stage-text bg-paper text-lg text-muted hover:border-clay"
           >
             +
             <input

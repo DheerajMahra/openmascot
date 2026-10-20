@@ -4,7 +4,6 @@ import type { MascotPlayer } from "@openmascot/embed";
 
 import { useRef } from "react";
 
-import { NextStepLink } from "@/components/editor/next-step-link";
 import { EditorPreviewPanel } from "@/components/layout/editor-shell";
 import { MascotPreview } from "@/components/mascot/mascot-preview";
 import { MascotStage } from "@/components/mascot/mascot-stage";
@@ -41,7 +40,6 @@ export const MakePreview = () => {
           <span className="text-[13px] text-muted">No moves yet. Add some on the next step.</span>
         )}
       </div>
-      <NextStepLink />
     </EditorPreviewPanel>
   );
 };

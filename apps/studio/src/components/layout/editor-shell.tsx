@@ -1,37 +1,95 @@
-import type { HTMLAttributes } from "react";
+"use client";
 
+import type { HTMLAttributes, ReactNode } from "react";
+import type { LayoutStorage } from "react-resizable-panels";
+
+import { useDefaultLayout } from "react-resizable-panels";
+
+import { NextStepLink } from "@/components/editor/next-step-link";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { cn } from "@/lib/utils";
 
 /**
- * The three columns every editor step shares: a narrow sidebar, the main workspace,
- * and the live preview. Each is a landmark, so pass an aria-label.
+ * The three columns every editor step shares: a sidebar, the main workspace, and the live
+ * preview. Both side columns share one size rule and can be dragged wider, never narrower
+ * than SIDE_MIN. Each column is a landmark, so pass an aria-label.
  */
+
+const SIDE_MIN = 280;
+const SIDE_DEFAULT = 300;
+const SIDE_MAX = 480;
+const WORKSPACE_MIN = 480;
+
+// Widths carry over between Make and Animate for this visit. Kept in memory, not localStorage,
+// so the first render always matches the server's.
+const memory = new Map<string, string>();
+const layoutStorage: LayoutStorage = {
+  getItem: key => memory.get(key) ?? null,
+  setItem: (key, value) => void memory.set(key, value)
+};
+
+export const EditorColumns = ({
+  sidebar,
+  workspace,
+  preview
+}: {
+  sidebar: ReactNode;
+  workspace: ReactNode;
+  preview: ReactNode;
+}) => {
+  const { defaultLayout, onLayoutChanged } = useDefaultLayout({
+    id: "editor-columns",
+    storage: layoutStorage
+  });
+
+  return (
+    <ResizablePanelGroup
+      orientation="horizontal"
+      defaultLayout={defaultLayout}
+      onLayoutChanged={onLayoutChanged}
+      className="flex-1"
+    >
+      <ResizablePanel id="sidebar" defaultSize={SIDE_DEFAULT} minSize={SIDE_MIN} maxSize={SIDE_MAX}>
+        {sidebar}
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel id="workspace" minSize={WORKSPACE_MIN}>
+        {workspace}
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      <ResizablePanel id="preview" defaultSize={SIDE_DEFAULT} minSize={SIDE_MIN} maxSize={SIDE_MAX}>
+        {preview}
+      </ResizablePanel>
+    </ResizablePanelGroup>
+  );
+};
 
 type PanelProps = HTMLAttributes<HTMLElement> & { "aria-label": string };
 
+/** Exactly as tall as its panel: give the list inside `min-h-0 overflow-y-auto` and it scrolls alone. */
 export const EditorSidebar = ({ className, ...rest }: PanelProps) => (
   <aside
-    className={cn(
-      "flex min-w-0 flex-[0_1_210px] flex-col gap-2.5 border-r border-line bg-paper-2 px-3.5 py-5",
-      className
-    )}
+    className={cn("flex h-full min-w-0 flex-col gap-2.5 bg-paper-2 px-5 py-5", className)}
     {...rest}
   />
 );
 
 export const EditorWorkspace = ({ className, ...rest }: PanelProps) => (
   <section
-    className={cn(
-      "flex min-w-0 flex-[999_1_560px] flex-col gap-4.5 border-r border-line px-6 py-5",
-      className
-    )}
+    className={cn("flex min-h-full min-w-0 flex-col gap-4.5 px-6 py-5", className)}
     {...rest}
   />
 );
 
-export const EditorPreviewPanel = ({ className, ...rest }: PanelProps) => (
+/** The preview column. Next stays pinned to its foot, even while the column above scrolls. */
+export const EditorPreviewPanel = ({ className, children, ...rest }: PanelProps) => (
   <aside
-    className={cn("flex min-w-0 flex-[1_1_300px] flex-col gap-3.5 bg-paper-2 px-6 py-5", className)}
+    className={cn("flex min-h-full min-w-0 flex-col gap-3.5 bg-paper-2 px-5 pt-5", className)}
     {...rest}
-  />
+  >
+    {children}
+    <div className="sticky bottom-0 mt-auto -mx-5 bg-paper-2 px-5 pt-1.5 pb-5">
+      <NextStepLink />
+    </div>
+  </aside>
 );

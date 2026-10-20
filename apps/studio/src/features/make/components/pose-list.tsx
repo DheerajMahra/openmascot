@@ -23,7 +23,7 @@ export const PoseList = () => {
         Poses
         <InfoTip label="About poses" text={POSES_HELP} />
       </SectionLabel>
-      <div className="flex max-h-[380px] flex-col gap-1.5 overflow-y-auto pr-0.5">
+      <div className="flex min-h-0 flex-col gap-1.5 overflow-y-auto pr-0.5">
         {Object.keys(doc.poses).map(name => (
           <SelectableItem
             key={name}

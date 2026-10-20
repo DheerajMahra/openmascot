@@ -1,6 +1,6 @@
 "use client";
 
-import { EditorWorkspace } from "@/components/layout/editor-shell";
+import { EditorColumns, EditorWorkspace } from "@/components/layout/editor-shell";
 import { MakePreview } from "@/features/make/components/make-preview";
 import { MakeSidebar } from "@/features/make/components/make-sidebar";
 import { Pixelboard } from "@/features/make/components/pixelboard";
@@ -14,23 +14,23 @@ export const MakeScreen = () => {
   useUndoShortcuts();
 
   return (
-    <>
-      <MakeSidebar />
-
-      <EditorWorkspace aria-label="Pose editor">
-        <PoseHeader />
-        <div className="flex flex-grow flex-wrap items-start gap-4 pt-2">
-          <ToolColumn />
-          <div className="flex min-w-0 flex-[1_1_400px] justify-center">
-            <Pixelboard />
+    <EditorColumns
+      sidebar={<MakeSidebar />}
+      workspace={
+        <EditorWorkspace aria-label="Pose editor">
+          <PoseHeader />
+          <div className="flex flex-grow flex-wrap items-start gap-4 pt-2">
+            <ToolColumn />
+            <div className="flex min-w-0 flex-[1_1_400px] justify-center">
+              <Pixelboard />
+            </div>
           </div>
-        </div>
-        <div className="mt-auto flex justify-center pt-4 pl-14">
-          <TipsSlider />
-        </div>
-      </EditorWorkspace>
-
-      <MakePreview />
-    </>
+          <div className="mt-auto flex justify-center pt-4 pl-14">
+            <TipsSlider />
+          </div>
+        </EditorWorkspace>
+      }
+      preview={<MakePreview />}
+    />
   );
 };

@@ -5,7 +5,6 @@ import type { RefObject } from "react";
 
 import { useEffect } from "react";
 
-import { NextStepLink } from "@/components/editor/next-step-link";
 import { EditorPreviewPanel } from "@/components/layout/editor-shell";
 import { MascotPreview } from "@/components/mascot/mascot-preview";
 import { MascotStage } from "@/components/mascot/mascot-stage";
@@ -43,7 +42,6 @@ export const MovePreview = ({ playerRef, onPlay }: Props) => {
       >
         <PlayIcon width={12} height={12} /> Play {seqName}
       </Button>
-      <NextStepLink />
     </EditorPreviewPanel>
   );
 };
