@@ -43,7 +43,7 @@ export type MascotAction =
   | { type: "select-seq"; name: string }
   | { type: "set-tool"; tool: Tool }
   | { type: "set-color"; index: number }
-  | { type: "set-palette"; index: number; hex: string }
+  | { type: "set-palette"; index: number; hex: string; commit: boolean }
   | { type: "add-color"; hex: string }
   | { type: "paint"; pose: string; value: string; commit: boolean }
   | { type: "paint-cell"; pose: string; x: number; y: number; ch: string; commit: boolean }
@@ -70,6 +70,8 @@ export type MascotAction =
 
 const BLOBBY = blobbyJson as unknown as MascotDoc;
 const MAX_HISTORY = 50;
+/** Pose cells hold one base-36 character per palette index. */
+export const MAX_COLORS = 36;
 
 export const createBlankMascot = (): MascotDoc => {
   const grid = { w: 24, h: 16 };
@@ -168,11 +170,13 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "set-color":
       return { ...s, colorIndex: a.index };
     case "set-palette": {
+      if (doc.palette[a.index] === undefined || doc.palette[a.index] === a.hex) return s;
+      // Poses point at palette slots, so every pixel painted with this color changes with it.
       const palette = doc.palette.map((c, i) => (i === a.index ? a.hex : c));
-      return { ...s, doc: { ...doc, palette } };
+      return withDoc(s, { ...doc, palette }, a.commit);
     }
     case "add-color": {
-      if (doc.palette.length >= 36) return s;
+      if (doc.palette.length >= MAX_COLORS) return s;
       const palette = [...doc.palette, a.hex];
       return { ...withDoc(s, { ...doc, palette }), colorIndex: palette.length - 1 };
     }
@@ -235,6 +239,7 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       return {
         ...s,
         doc: prev,
+        colorIndex: Math.min(s.colorIndex, prev.palette.length - 1),
         history: s.history.slice(0, -1),
         future: [s.doc, ...s.future].slice(0, MAX_HISTORY)
       };
@@ -245,6 +250,7 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       return {
         ...s,
         doc: next,
+        colorIndex: Math.min(s.colorIndex, next.palette.length - 1),
         future: s.future.slice(1),
         history: [...s.history.slice(-(MAX_HISTORY - 1)), s.doc]
       };
@@ -357,6 +363,8 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
 
 export interface MascotStore {
   getState: () => MascotState;
+  /** What the server rendered with; hydration must match it, whatever the store holds by then. */
+  getInitialState: () => MascotState;
   dispatch: (action: MascotAction) => void;
   subscribe: (listener: () => void) => () => void;
 }
@@ -367,6 +375,7 @@ export const createMascotStore = (initial: MascotState = initialState): MascotSt
   const listeners = new Set<() => void>();
   return {
     getState: () => state,
+    getInitialState: () => initial,
     dispatch: action => {
       const next = reducer(state, action);
       if (next === state) return;
@@ -383,7 +392,8 @@ export const createMascotStore = (initial: MascotState = initialState): MascotSt
 /** Subscribes to one slice. The selector must return something stable: a primitive or a part of the state, never a fresh object. */
 const useStoreSelector = <T,>(store: MascotStore, selector: (s: MascotState) => T): T => {
   const getSnapshot = () => selector(store.getState());
-  return useSyncExternalStore(store.subscribe, getSnapshot, getSnapshot);
+  const getServerSnapshot = () => selector(store.getInitialState());
+  return useSyncExternalStore(store.subscribe, getSnapshot, getServerSnapshot);
 };
 
 const MascotStoreContext = createContext<MascotStore | null>(null);
@@ -393,18 +403,20 @@ export const MascotProvider = ({ children }: { children: ReactNode }) => {
   const doc = useStoreSelector(store, s => s.doc);
   const hydrated = useStoreSelector(store, s => s.hydrated);
 
-  // The doc that came out of storage; saving it back would fake an "edited just now".
-  const hydratedDoc = useRef<MascotDoc | null>(null);
+  // The doc storage already holds. Starts as the one loaded, so loading doesn't fake an "edited just now";
+  // compared to the last save (not the load) so undoing back to the loaded doc still saves.
+  const savedDoc = useRef<MascotDoc | null>(null);
 
   useEffect(() => {
     const stored = loadCurrent();
-    hydratedDoc.current = stored;
+    savedDoc.current = stored;
     store.dispatch({ type: "hydrate", doc: stored });
   }, [store]);
 
   useEffect(() => {
-    if (!hydrated || doc === hydratedDoc.current) return;
+    if (!hydrated || doc === savedDoc.current) return;
     saveCurrent(doc);
+    savedDoc.current = doc;
   }, [doc, hydrated]);
 
   return <MascotStoreContext.Provider value={store}>{children}</MascotStoreContext.Provider>;

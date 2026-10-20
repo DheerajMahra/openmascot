@@ -2,17 +2,51 @@
 
 import type { MouseEvent } from "react";
 
+import { useRef } from "react";
+
 import { SectionLabel } from "@/components/ui/section-label";
-import { useEditorTool, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
+import {
+  MAX_COLORS,
+  useEditorTool,
+  useMascotDispatch,
+  useMascotSelector
+} from "@/lib/mascot-store";
 import { cn } from "@/lib/utils";
 
-const MAX_COLORS = 36;
+const ADD_START = "#ffffff";
 
 /** The paint colors. First click picks the color to paint with; a click on the picked one edits it. */
 export const PalettePicker = () => {
   const dispatch = useMascotDispatch();
   const palette = useMascotSelector(s => s.doc.palette);
   const { colorIndex } = useEditorTool();
+  // A color picker reports every drag tick. The first tick of a pick adds or changes a swatch and
+  // makes one undo step; the rest update that swatch. The native change event ends the pick.
+  const picking = useRef<number | null>(null);
+
+  const onPick = (hex: string, index?: number) => {
+    if (picking.current !== null) {
+      dispatch({ type: "set-palette", index: picking.current, hex, commit: false });
+    } else if (index === undefined) {
+      picking.current = palette.length;
+      dispatch({ type: "add-color", hex });
+    } else {
+      picking.current = index;
+      dispatch({ type: "set-palette", index, hex, commit: true });
+    }
+  };
+
+  // React's onChange is the native input event, so listen for the native change event directly.
+  // `resetTo` puts the add input back to its starting color once a pick is done.
+  const endPickOnChange = (resetTo?: string) => (el: HTMLInputElement | null) => {
+    if (!el) return;
+    const onDone = () => {
+      picking.current = null;
+      if (resetTo) el.value = resetTo;
+    };
+    el.addEventListener("change", onDone);
+    return () => el.removeEventListener("change", onDone);
+  };
 
   const onSwatchClick = (e: MouseEvent<HTMLInputElement>, index: number) => {
     if (index !== colorIndex) {
@@ -34,8 +68,9 @@ export const PalettePicker = () => {
               value={hex}
               aria-label={`Color ${i + 1}${selected ? ", selected" : ""}`}
               title={selected ? "Click again to change this color" : "Paint with this color"}
+              ref={endPickOnChange()}
               onClick={e => onSwatchClick(e, i)}
-              onChange={e => dispatch({ type: "set-palette", index: i, hex: e.target.value })}
+              onChange={e => onPick(e.target.value, i)}
               className={cn(
                 "h-9 w-full cursor-pointer rounded-md p-0",
                 selected
@@ -55,8 +90,9 @@ export const PalettePicker = () => {
             <input
               type="color"
               aria-label="Add a color"
-              defaultValue="#ffffff"
-              onChange={e => dispatch({ type: "add-color", hex: e.target.value })}
+              ref={endPickOnChange(ADD_START)}
+              defaultValue={ADD_START}
+              onChange={e => onPick(e.target.value)}
               className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
             />
           </label>
