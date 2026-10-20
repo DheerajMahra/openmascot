@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
+import type { ComponentProps, SelectHTMLAttributes } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export const fieldClass =
   "rounded-md border border-line bg-paper px-2.5 py-1.5 text-[13px] text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-clay";
 
-export const Input = ({ className, ...rest }: InputHTMLAttributes<HTMLInputElement>) => (
+export const Input = ({ className, ...rest }: ComponentProps<"input">) => (
   <input className={cn(fieldClass, className)} {...rest} />
 );
 

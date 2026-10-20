@@ -1,5 +1,5 @@
 import type { VariantProps } from "class-variance-authority";
-import type { ButtonHTMLAttributes } from "react";
+import type { ComponentProps } from "react";
 
 import { cva } from "class-variance-authority";
 
@@ -32,7 +32,7 @@ const iconButtonVariants = cva(
   }
 );
 
-export type IconButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+export type IconButtonProps = ComponentProps<"button"> &
   VariantProps<typeof iconButtonVariants> & {
     /** Accessible name, also shown as the tooltip. */
     label: string;

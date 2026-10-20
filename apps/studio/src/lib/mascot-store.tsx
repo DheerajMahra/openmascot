@@ -50,7 +50,7 @@ export type MascotAction =
   | { type: "fill-cell"; pose: string; x: number; y: number; ch: string }
   | { type: "reset-pose"; name: string }
   | { type: "clear-pose"; name: string }
-  | { type: "add-pose"; name: string; from?: string }
+  | { type: "add-pose"; name?: string; from?: string }
   | { type: "rename-pose"; from: string; to: string }
   | { type: "delete-pose"; name: string }
   | { type: "undo" }
@@ -127,6 +127,22 @@ const slug = (name: string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
+/** A pose name as stored: lower case letters, digits, single spaces, "-" and "_", at most 32 characters. */
+export const toPoseName = (name: string): string =>
+  name
+    .toLowerCase()
+    .replace(/[^a-z0-9 _-]+/g, "")
+    .replace(/\s+/g, " ")
+    .slice(0, 32)
+    .replace(/^[\s_-]+|[\s_-]+$/g, "");
+
+/** "default 1", or the next number up if that is taken. */
+export const nextPoseName = (poses: Record<string, string>): string => {
+  let n = 1;
+  while (`default ${n}` in poses) n++;
+  return `default ${n}`;
+};
+
 /** Every non-idle trigger key that plays this sequence, in table order. */
 export const triggersFor = (doc: MascotDoc, seq: string): string[] =>
   Object.entries(doc.triggers)
@@ -202,7 +218,7 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "clear-pose":
       return withDoc(s, { ...doc, poses: { ...doc.poses, [a.name]: blankPose(w, h) } });
     case "add-pose": {
-      const name = slug(a.name);
+      const name = a.name === undefined ? nextPoseName(doc.poses) : toPoseName(a.name);
       if (!name || name in doc.poses) return s;
       const value = normalizePose(doc.poses[a.from ?? "default"] ?? "", w, h);
       return {
@@ -211,7 +227,7 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       };
     }
     case "rename-pose": {
-      const to = slug(a.to);
+      const to = toPoseName(a.to);
       if (!to || to in doc.poses || a.from === "default") return s;
       const sequences: MascotDoc["sequences"] = {};
       for (const [k, seq] of Object.entries(doc.sequences)) {

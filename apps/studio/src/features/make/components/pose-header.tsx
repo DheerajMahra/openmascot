@@ -1,23 +1,44 @@
 "use client";
 
+import { useRef, useState } from "react";
+import { flushSync } from "react-dom";
+
 import {
   DeleteAction,
   EntityHeader,
   EntityHeaderActions,
+  EntityHeaderRenameForm,
   EntityHeaderTitle,
   RenameAction
 } from "@/components/editor/entity-header";
-import { useEditorSelection, useMascotDispatch } from "@/lib/mascot-store";
+import {
+  toPoseName,
+  useEditorSelection,
+  useMascotDispatch,
+  useMascotSelector
+} from "@/lib/mascot-store";
 
-/** "POSE · default" with rename and delete. The default pose can't be deleted. */
+/** "POSE · default" with rename and delete. The default pose can't be renamed or deleted. */
 export const PoseHeader = () => {
   const dispatch = useMascotDispatch();
+  const poses = useMascotSelector(s => s.doc.poses);
   const { poseName } = useEditorSelection();
   const isDefault = poseName === "default";
+  // The pose being renamed; picking another pose closes the form.
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const renameButton = useRef<HTMLButtonElement>(null);
 
-  const rename = () => {
-    const name = window.prompt("Rename pose:", poseName)?.trim();
-    if (name && name !== poseName) dispatch({ type: "rename-pose", from: poseName, to: name });
+  // Put keyboard focus back on the pencil once the form is gone.
+  const closeRename = () => {
+    flushSync(() => setRenaming(null));
+    renameButton.current?.focus();
+  };
+
+  const validate = (draft: string): string | null => {
+    const name = toPoseName(draft);
+    if (!name) return "Give the pose a name.";
+    if (name !== poseName && name in poses) return `There's already a pose called "${name}".`;
+    return null;
   };
 
   const remove = () => {
@@ -28,15 +49,35 @@ export const PoseHeader = () => {
 
   return (
     <EntityHeader>
-      <EntityHeaderTitle kind="Pose" name={poseName} />
-      <EntityHeaderActions>
-        <RenameAction label="Rename pose" onClick={rename} />
-        <DeleteAction
-          label={isDefault ? "The default pose can't be deleted" : "Delete pose"}
-          disabled={isDefault}
-          onClick={remove}
+      {renaming === poseName ? (
+        <EntityHeaderRenameForm
+          kind="Pose"
+          name={poseName}
+          validate={validate}
+          onSave={draft => {
+            dispatch({ type: "rename-pose", from: poseName, to: draft });
+            closeRename();
+          }}
+          onCancel={closeRename}
         />
-      </EntityHeaderActions>
+      ) : (
+        <>
+          <EntityHeaderTitle kind="Pose" name={poseName} />
+          <EntityHeaderActions>
+            <RenameAction
+              ref={renameButton}
+              label={isDefault ? "The default pose can't be renamed" : "Rename pose"}
+              disabled={isDefault}
+              onClick={() => setRenaming(poseName)}
+            />
+            <DeleteAction
+              label={isDefault ? "The default pose can't be deleted" : "Delete pose"}
+              disabled={isDefault}
+              onClick={remove}
+            />
+          </EntityHeaderActions>
+        </>
+      )}
     </EntityHeader>
   );
 };

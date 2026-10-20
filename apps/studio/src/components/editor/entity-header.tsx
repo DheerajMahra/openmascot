@@ -1,7 +1,11 @@
-import type { HTMLAttributes, ReactNode } from "react";
+import type { FormEvent, HTMLAttributes, KeyboardEvent, ReactNode, Ref } from "react";
 
+import { useEffect, useId, useRef, useState } from "react";
+
+import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { PencilIcon, TrashIcon } from "@/components/ui/icons";
+import { Input } from "@/components/ui/input";
 import { SectionLabel } from "@/components/ui/section-label";
 import { cn } from "@/lib/utils";
 
@@ -38,6 +42,7 @@ export const EntityHeaderMeta = ({ children }: { children: ReactNode }) => (
 
 interface ActionProps {
   label: string;
+  ref?: Ref<HTMLButtonElement>;
   disabled?: boolean;
   onClick: () => void;
 }
@@ -53,3 +58,72 @@ export const DeleteAction = (props: ActionProps) => (
     <TrashIcon width={13} height={13} />
   </IconButton>
 );
+
+interface RenameFormProps {
+  kind: string;
+  name: string;
+  /** Returns why the draft can't be saved, or null when it can. */
+  validate: (draft: string) => string | null;
+  onSave: (draft: string) => void;
+  onCancel: () => void;
+}
+
+/** Takes the title's place while renaming: the name in a text box with Save on its right. Esc cancels. */
+export const EntityHeaderRenameForm = ({
+  kind,
+  name,
+  validate,
+  onSave,
+  onCancel
+}: RenameFormProps) => {
+  const [draft, setDraft] = useState(name);
+  const errorId = useId();
+  const input = useRef<HTMLInputElement>(null);
+
+  // The user asked to rename, so take them straight to the name, selected and ready to type over.
+  useEffect(() => {
+    input.current?.focus();
+    input.current?.select();
+  }, []);
+  const error = draft === name ? null : validate(draft);
+
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    if (draft === name) onCancel();
+    else if (!error) onSave(draft);
+  };
+
+  const onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape") onCancel();
+  };
+
+  return (
+    <form onSubmit={submit} className="flex flex-wrap items-center gap-2.5">
+      <SectionLabel>{kind}</SectionLabel>
+      <span aria-hidden="true" className="text-xs text-stage-text">
+        ·
+      </span>
+      <Input
+        type="text"
+        name="name"
+        autoComplete="off"
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onKeyDown={onKeyDown}
+        ref={input}
+        aria-label={`${kind} name`}
+        aria-invalid={error !== null}
+        aria-describedby={error ? errorId : undefined}
+        className="h-7 w-48 py-0 font-mono"
+      />
+      <Button type="submit" variant="primary" className="h-7 py-0" disabled={error !== null}>
+        Save
+      </Button>
+      {error && (
+        <span id={errorId} role="alert" className="text-xs text-warning">
+          {error}
+        </span>
+      )}
+    </form>
+  );
+};

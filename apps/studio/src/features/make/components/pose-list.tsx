@@ -17,11 +17,6 @@ export const PoseList = () => {
   const doc = useMascotDoc();
   const { poseName } = useEditorSelection();
 
-  const addPose = () => {
-    const name = window.prompt("Name the new pose:", "")?.trim();
-    if (name) dispatch({ type: "add-pose", name, from: "default" });
-  };
-
   return (
     <>
       <SectionLabel className="h-6">
@@ -43,7 +38,11 @@ export const PoseList = () => {
           </SelectableItem>
         ))}
       </div>
-      <Button variant="dashed" className="text-left font-mono" onClick={addPose}>
+      <Button
+        variant="dashed"
+        className="text-left font-mono"
+        onClick={() => dispatch({ type: "add-pose", from: "default" })}
+      >
         + New pose
       </Button>
     </>
