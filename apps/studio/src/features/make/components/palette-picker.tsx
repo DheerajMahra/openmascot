@@ -3,16 +3,16 @@
 import type { MouseEvent } from "react";
 
 import { SectionLabel } from "@/components/ui/section-label";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorTool, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 import { cn } from "@/lib/utils";
 
 const MAX_COLORS = 36;
 
 /** The paint colors. First click picks the color to paint with; a click on the picked one edits it. */
 export const PalettePicker = () => {
-  const { state, dispatch } = useMascot();
-  const { palette } = state.doc;
-  const { colorIndex } = state;
+  const dispatch = useMascotDispatch();
+  const palette = useMascotSelector(s => s.doc.palette);
+  const { colorIndex } = useEditorTool();
 
   const onSwatchClick = (e: MouseEvent<HTMLInputElement>, index: number) => {
     if (index !== colorIndex) {

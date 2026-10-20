@@ -12,7 +12,7 @@ import { MascotStage } from "@/components/mascot/mascot-stage";
 import { Button } from "@/components/ui/button";
 import { PlayIcon } from "@/components/ui/icons";
 import { SectionLabel } from "@/components/ui/section-label";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDoc } from "@/lib/mascot-store";
 
 interface Props {
   playerRef: RefObject<MascotPlayer | null>;
@@ -21,7 +21,8 @@ interface Props {
 
 /** Right column of Animate: the mascot, one Play button, Next. */
 export const MovePreview = ({ playerRef, onPlay }: Props) => {
-  const { seqName } = useMascot().state;
+  const doc = useMascotDoc();
+  const { seqName } = useEditorSelection();
 
   // Play the selected move once the runtime is mounted; edits are picked up by setDoc.
   useEffect(() => {
@@ -32,7 +33,7 @@ export const MovePreview = ({ playerRef, onPlay }: Props) => {
     <EditorPreviewPanel aria-label="Live preview">
       <SectionLabel>Preview</SectionLabel>
       <MascotStage className="h-[260px] px-6 pt-0 pb-7">
-        <MascotPreview scale={8} triggers={false} playerRef={playerRef} />
+        <MascotPreview doc={doc} scale={8} triggers={false} playerRef={playerRef} />
       </MascotStage>
       <Button
         variant="primary"

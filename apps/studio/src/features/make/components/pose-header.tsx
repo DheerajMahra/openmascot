@@ -7,12 +7,12 @@ import {
   EntityHeaderTitle,
   RenameAction
 } from "@/components/editor/entity-header";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDispatch } from "@/lib/mascot-store";
 
 /** "POSE · default" with rename and delete. The default pose can't be deleted. */
 export const PoseHeader = () => {
-  const { state, dispatch } = useMascot();
-  const { poseName } = state;
+  const dispatch = useMascotDispatch();
+  const { poseName } = useEditorSelection();
   const isDefault = poseName === "default";
 
   const rename = () => {

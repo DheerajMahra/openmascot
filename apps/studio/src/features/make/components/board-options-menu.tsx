@@ -10,12 +10,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { IconButton } from "@/components/ui/icon-button";
 import { DotsIcon } from "@/components/ui/icons";
-import { useMascot } from "@/lib/mascot-store";
+import { useBoardOptions, useEditorSelection, useMascotDispatch } from "@/lib/mascot-store";
 
 /** The ⋯ menu: board guides, plus resetting or clearing the current pose. */
 export const BoardOptionsMenu = () => {
-  const { state, dispatch } = useMascot();
-  const { board, poseName } = state;
+  const dispatch = useMascotDispatch();
+  const board = useBoardOptions();
+  const { poseName } = useEditorSelection();
 
   return (
     <DropdownMenu>

@@ -12,13 +12,12 @@ import { StepTable } from "@/features/animate/components/step-table";
 import { TriggersTable } from "@/features/animate/components/triggers-table";
 import { useLiveStep } from "@/features/animate/hooks/use-live-step";
 import { startTick } from "@/features/animate/lib/timeline";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotSelector } from "@/lib/mascot-store";
 
 /** Step 2: string poses into moves and say when each one plays. */
 export const AnimateScreen = () => {
-  const { state } = useMascot();
-  const { doc, seqName } = state;
-  const frames = doc.sequences[seqName] ?? [];
+  const { seqName } = useEditorSelection();
+  const frames = useMascotSelector(s => s.doc.sequences[seqName]) ?? [];
   const playerRef = useRef<MascotPlayer | null>(null);
 
   // The row the user clicked, remembered per move so switching moves clears it.

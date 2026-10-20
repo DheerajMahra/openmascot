@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { MascotPreview } from "@/components/mascot/mascot-preview";
 import { SectionLabel } from "@/components/ui/section-label";
 import { StartTile, StartTileBody, StartTileMedia } from "@/features/start/components/start-tile";
-import { createBlankMascot, useMascot } from "@/lib/mascot-store";
+import { createBlankMascot, useMascotDispatch } from "@/lib/mascot-store";
 import { SAMPLES, cloneSample } from "@/lib/samples";
 
 /** A light grid like the drawing board, so the blank tile reads as "empty canvas". */
@@ -18,7 +18,7 @@ const BOARD_GRID = {
 
 /** Blank canvas plus every sample. Picking one replaces the current mascot and opens Make. */
 export const StartingPoints = () => {
-  const { dispatch } = useMascot();
+  const dispatch = useMascotDispatch();
   const router = useRouter();
 
   const start = (doc: ReturnType<typeof createBlankMascot>) => {

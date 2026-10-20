@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { CloseIcon } from "@/components/ui/icons";
 import { Select } from "@/components/ui/input";
 import { TriggerDetailField } from "@/features/animate/components/trigger-detail-field";
-import { useMascot } from "@/lib/mascot-store";
+import { useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 import { TRIGGER_KINDS, buildTrigger, parseTrigger } from "@/lib/presets";
 
 interface Props {
@@ -20,10 +20,11 @@ interface Props {
 
 /** One trigger: when it fires, its detail (seconds, event name), and which move plays. */
 export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
-  const { state, dispatch } = useMascot();
-  const { doc } = state;
+  const dispatch = useMascotDispatch();
+  const triggers = useMascotSelector(s => s.doc.triggers);
+  const sequences = useMascotSelector(s => s.doc.sequences);
   const { kind, param } = parseTrigger(key);
-  const moves = Object.keys(doc.sequences);
+  const moves = Object.keys(sequences);
 
   const replace = (to: string, nextSeq = seq) =>
     dispatch({ type: "replace-trigger", from: key, to, seq: nextSeq });
@@ -40,7 +41,7 @@ export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
         {kind === null && <option value="">{key}</option>}
         {TRIGGER_KINDS.map(k => {
           // Only one row can own "click", "hover" or "load".
-          const taken = k.id !== kind && k.id in doc.triggers;
+          const taken = k.id !== kind && k.id in triggers;
           return (
             <option key={k.id} value={k.id} disabled={taken}>
               {k.label}
@@ -58,11 +59,11 @@ export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
       />
       <Select
         aria-label={`Play, trigger ${n}`}
-        value={seq in doc.sequences ? seq : ""}
+        value={seq in sequences ? seq : ""}
         onChange={e => replace(key, e.target.value)}
         className="min-w-0 px-1.5 font-mono"
       >
-        {!(seq in doc.sequences) && <option value="">{seq} (missing)</option>}
+        {!(seq in sequences) && <option value="">{seq} (missing)</option>}
         {moves.map(m => (
           <option key={m} value={m}>
             {m}

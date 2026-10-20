@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { GridTable, GridTableHeader } from "@/components/ui/grid-table";
 import { StepRow } from "@/features/animate/components/step-row";
 import { useStepReorder } from "@/features/animate/hooks/use-step-reorder";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDispatch, useMascotDoc } from "@/lib/mascot-store";
 import { DEFAULT_HOLD } from "@/lib/presets";
 
 export const STEP_COLUMNS = "14px 18px minmax(160px,1fr) 96px 96px 96px 28px";
@@ -18,8 +18,9 @@ interface Props {
 
 /** The poses of one move, one row each: drag handle, pose, Hold, Down, Slide, remove. */
 export const StepTable = ({ activeStep, onSelectStep }: Props) => {
-  const { state, dispatch } = useMascot();
-  const { doc, seqName } = state;
+  const dispatch = useMascotDispatch();
+  const doc = useMascotDoc();
+  const { seqName } = useEditorSelection();
   const frames = doc.sequences[seqName] ?? [];
   const poses = Object.keys(doc.poses);
 
@@ -56,6 +57,7 @@ export const StepTable = ({ activeStep, onSelectStep }: Props) => {
       {frames.map((frame, i) => (
         <StepRow
           key={i}
+          doc={doc}
           index={i}
           frame={frame}
           poses={poses}

@@ -8,15 +8,17 @@ import {
   EntityHeaderTitle,
   RenameAction
 } from "@/components/editor/entity-header";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 import { secondsOf, ticksOf } from "@/lib/presets";
 
 /** "MOVE · idle" with rename, delete, and the move's length. The idle move is fixed. */
 export const MoveHeader = () => {
-  const { state, dispatch } = useMascot();
-  const { doc, seqName } = state;
-  const frames = doc.sequences[seqName] ?? [];
-  const isIdle = seqName === (doc.triggers.idle ?? "idle");
+  const dispatch = useMascotDispatch();
+  const { seqName } = useEditorSelection();
+  const frames = useMascotSelector(s => s.doc.sequences[seqName]) ?? [];
+  const idle = useMascotSelector(s => s.doc.triggers.idle) ?? "idle";
+  const tick = useMascotSelector(s => s.doc.tick);
+  const isIdle = seqName === idle;
 
   const rename = () => {
     const to = window.prompt("Rename move:", seqName)?.trim();
@@ -46,7 +48,7 @@ export const MoveHeader = () => {
       </EntityHeaderActions>
       <EntityHeaderMeta>
         {frames.length} pose{frames.length === 1 ? "" : "s"} · {ticksOf(frames)} frames ·{" "}
-        {secondsOf(frames, doc.tick)} s
+        {secondsOf(frames, tick)} s
       </EntityHeaderMeta>
     </EntityHeader>
   );

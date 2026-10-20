@@ -8,11 +8,12 @@ import { OptionCard, OptionCardDescription, OptionCardTitle } from "@/components
 import { SectionLabel } from "@/components/ui/section-label";
 import { download, downloadBlob } from "@/features/share/lib/download";
 import { encodeMoveGif } from "@/lib/gif-encoder";
-import { useMascot } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDoc } from "@/lib/mascot-store";
 
 /** JSON for the embed, a GIF of one move, and a PNG of the current pose. */
 export const DownloadOptions = ({ base }: { base: string }) => {
-  const { doc, poseName } = useMascot().state;
+  const doc = useMascotDoc();
+  const { poseName } = useEditorSelection();
   const idle = doc.triggers.idle ?? "idle";
   const moves = Object.keys(doc.sequences);
   const [gifChoice, setGifChoice] = useState<string | null>(null);

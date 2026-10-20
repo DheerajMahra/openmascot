@@ -7,7 +7,12 @@ import { InfoTip } from "@/components/ui/info-tip";
 import { SectionLabel } from "@/components/ui/section-label";
 import { Separator } from "@/components/ui/separator";
 import { NewMoveSelect } from "@/features/animate/components/new-move-select";
-import { triggersFor, useMascot } from "@/lib/mascot-store";
+import {
+  triggersFor,
+  useEditorSelection,
+  useMascotDispatch,
+  useMascotDoc
+} from "@/lib/mascot-store";
 import { describeTriggers } from "@/lib/presets";
 
 const MOVES_HELP =
@@ -15,8 +20,9 @@ const MOVES_HELP =
 
 /** Left column of Animate: every move with when it plays, and a way to start a new one. */
 export const MovesList = () => {
-  const { state, dispatch } = useMascot();
-  const { doc, seqName } = state;
+  const dispatch = useMascotDispatch();
+  const doc = useMascotDoc();
+  const { seqName } = useEditorSelection();
 
   return (
     <EditorSidebar aria-label="Moves">
