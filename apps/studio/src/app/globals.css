@@ -1,0 +1,105 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* The studio is light only; dark: classes in shadcn components apply only under a .dark parent. */
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-paper: #ffffff;
+  --color-paper-2: #faf8f5;
+  --color-ink: #1d1a17;
+  --color-muted: #6b645c;
+  --color-line: #d9d3cb;
+  --color-line-2: #efeae3;
+  --color-clay: #d97757;
+  --color-clay-deep: #be684d;
+  --color-clay-tint: #fdf3ee;
+  --color-stage: #141413;
+  --color-stage-text: #a39b90;
+  --color-ink-soft: #3d3833;
+  --color-code-fg: #f1ece4;
+  --color-board: #f6f2ec;
+  --color-board-grid: #e3dcd2;
+  --color-success: #4a7d2c;
+  --color-success-dot: #599036;
+  --color-warning: #9a6a12;
+  --color-warning-dot: #d49a2a;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* shadcn tokens. No --color-muted here: that name is the palette's muted text color above. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+/* shadcn's semantic colors, mapped onto the palette. */
+:root {
+  --background: #ffffff;
+  --foreground: #1d1a17;
+  --popover: #ffffff;
+  --popover-foreground: #1d1a17;
+  --primary: #1d1a17;
+  --primary-foreground: #ffffff;
+  --secondary: #faf8f5;
+  --secondary-foreground: #1d1a17;
+  --muted-foreground: #6b645c;
+  --accent: #efeae3;
+  --accent-foreground: #1d1a17;
+  --destructive: #be684d;
+  --border: #d9d3cb;
+  --input: #d9d3cb;
+  --ring: #d97757;
+  --radius: 0.5rem;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
+
+canvas {
+  image-rendering: pixelated;
+}
+
+/* Palette swatches are native color inputs; draw them as one flat fill, no inner rectangle. */
+input[type="color"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 4px;
+}
+input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 4px;
+}

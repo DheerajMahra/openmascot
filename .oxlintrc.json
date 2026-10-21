@@ -1,0 +1,36 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "unicorn", "oxc", "import"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "typescript/no-explicit-any": "error"
+  },
+  "overrides": [
+    {
+      "files": ["apps/**"],
+      "plugins": ["react", "jsx-a11y", "nextjs"],
+      "rules": {
+        "react/react-in-jsx-scope": "off",
+        "import/no-unassigned-import": ["warn", { "allow": ["**/*.css"] }]
+      }
+    },
+    {
+      "files": [
+        "**/components/ui/field.tsx",
+        "**/components/ui/input-group.tsx",
+        "**/components/ui/label.tsx"
+      ],
+      "plugins": ["jsx-a11y"],
+      "rules": {
+        "jsx-a11y/label-has-associated-control": "off",
+        "jsx-a11y/prefer-tag-over-role": "off",
+        "jsx-a11y/click-events-have-key-events": "off",
+        "jsx-a11y/no-noninteractive-element-interactions": "off"
+      }
+    }
+  ],
+  "ignorePatterns": ["**/node_modules", "dist", "coverage", ".next", "out", "next-env.d.ts"]
+}

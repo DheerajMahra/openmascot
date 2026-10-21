@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "studio",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@openmascot/studio", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "embed-demo",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@openmascot/embed", "demo"],
+      "port": 4311
+    }
+  ]
+}
