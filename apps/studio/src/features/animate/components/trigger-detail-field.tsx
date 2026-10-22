@@ -6,7 +6,7 @@ import type { KeyboardEvent } from "react";
 import { Input } from "@/components/ui/input";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { noSpinnerClass } from "@/components/ui/number-input";
-import { buildTrigger } from "@/lib/presets";
+import { DEFAULT_INTERVAL, buildTrigger } from "@/lib/presets";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -14,8 +14,8 @@ interface Props {
   triggerKey: string;
   kind: TriggerKind | null;
   param: string;
-  /** Called with the rebuilt trigger key once the user leaves the field. */
-  onCommit: (key: string) => void;
+  /** Called with the rebuilt trigger key once the user leaves the field; false if it's taken. */
+  onCommit: (key: string) => boolean;
 }
 
 const blurOnEnter = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -36,10 +36,11 @@ export const TriggerDetailField = ({ number: n, triggerKey, kind, param, onCommi
           max={600}
           aria-label={`Seconds, trigger ${n}`}
           key={triggerKey}
-          defaultValue={param || "8"}
+          defaultValue={param || DEFAULT_INTERVAL}
           onBlur={e => {
-            const secs = Math.max(1, parseInt(e.target.value, 10) || 8);
-            onCommit(buildTrigger("interval", String(secs)));
+            const secs = Math.max(1, parseInt(e.target.value, 10) || DEFAULT_INTERVAL);
+            // Another row already fires at these seconds: show this row's own value again.
+            if (!onCommit(buildTrigger("interval", String(secs)))) e.target.value = param;
           }}
           onKeyDown={blurOnEnter}
           className={cn("h-full font-mono", noSpinnerClass)}
@@ -56,12 +57,15 @@ export const TriggerDetailField = ({ number: n, triggerKey, kind, param, onCommi
       <Input
         type="text"
         aria-label={`Event name, trigger ${n}`}
+        placeholder='Mascot.emit("error")'
         key={triggerKey}
         defaultValue={param}
         onBlur={e => {
           const name = e.target.value.trim().replace(/\s+/g, "-");
-          if (name && name !== param) onCommit(buildTrigger("custom", name));
-          else e.target.value = param;
+          // Empty, unchanged, or another row's name: show this row's own name again.
+          if (!name || name === param || !onCommit(buildTrigger("custom", name))) {
+            e.target.value = param;
+          }
         }}
         onKeyDown={blurOnEnter}
         className="h-7 font-mono"

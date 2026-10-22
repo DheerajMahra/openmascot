@@ -51,10 +51,6 @@ export const TriggersTable = () => {
           Add trigger
         </GridTableAddRow>
       </GridTable>
-      <p className="m-0 text-xs leading-relaxed text-muted">
-        &quot;My site sends&quot; fires from page code:{" "}
-        <span className="font-mono text-ink">Mascot.emit(&quot;name&quot;)</span>.
-      </p>
     </div>
   );
 };

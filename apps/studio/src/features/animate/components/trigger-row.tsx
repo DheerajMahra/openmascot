@@ -15,11 +15,11 @@ import {
 } from "@/components/ui/select";
 import { TriggerDetailField } from "@/features/animate/components/trigger-detail-field";
 import { useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
-import { TRIGGER_KINDS, buildTrigger, parseTrigger } from "@/lib/presets";
+import { TRIGGER_KINDS, parseTrigger, uniqueTrigger } from "@/lib/presets";
 
 interface Props {
   number: number;
-  /** Key in doc.triggers, e.g. "click" or "interval:8". */
+  /** Key in doc.triggers, e.g. "click" or "interval:6". */
   triggerKey: string;
   /** Move it plays. */
   seq: string;
@@ -33,8 +33,12 @@ export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
   const { kind, param } = parseTrigger(key);
   const moves = Object.keys(sequences);
 
-  const replace = (to: string, nextSeq = seq) =>
+  /** False when another row already owns `to`; trigger keys are unique. */
+  const replace = (to: string, nextSeq = seq): boolean => {
+    if (to !== key && to in triggers) return false;
     dispatch({ type: "replace-trigger", from: key, to, seq: nextSeq });
+    return true;
+  };
 
   return (
     <GridTableRow>
@@ -42,7 +46,7 @@ export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
       <Select<TriggerKind>
         items={TRIGGER_KINDS.map(k => ({ value: k.id, label: k.label }))}
         value={kind}
-        onValueChange={next => next && replace(buildTrigger(next, ""))}
+        onValueChange={next => next && replace(uniqueTrigger(next, triggers))}
       >
         <SelectTrigger
           aria-label={`When, trigger ${n}`}

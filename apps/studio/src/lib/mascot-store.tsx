@@ -1,5 +1,6 @@
 "use client";
 
+import type { TriggerKind } from "@/lib/presets";
 import type { MascotDoc, MascotFrame } from "@openmascot/embed";
 import type { ReactNode } from "react";
 
@@ -13,6 +14,7 @@ import {
 } from "react";
 
 import { blankPose, floodFill, newId, normalizePose, setCell } from "@/lib/pose-utils";
+import { buildTrigger, uniqueTrigger } from "@/lib/presets";
 import { loadCurrent, saveCurrent } from "@/lib/storage";
 import clawdJson from "@/samples/clawd.json";
 
@@ -163,14 +165,15 @@ export const triggersFor = (doc: MascotDoc, seq: string): string[] =>
     .filter(([, value]) => value === seq)
     .map(([key]) => key);
 
-/** Trigger keys a new row can take, tried in order until one is free. */
-const TRIGGER_DEFAULTS = ["click", "hover", "load", "interval:8", "custom:event"];
+/** Trigger kinds a new row can take, tried in order until one is free. */
+const TRIGGER_DEFAULTS: TriggerKind[] = ["click", "hover", "load", "interval"];
 
 const freeTriggerKey = (triggers: Record<string, string>): string => {
-  for (const key of TRIGGER_DEFAULTS) if (!(key in triggers)) return key;
-  let n = 2;
-  while (`custom:event-${n}` in triggers) n++;
-  return `custom:event-${n}`;
+  for (const kind of TRIGGER_DEFAULTS) {
+    const key = buildTrigger(kind, "");
+    if (!(key in triggers)) return key;
+  }
+  return uniqueTrigger("custom", triggers);
 };
 
 const reducer = (s: MascotState, a: MascotAction): MascotState => {

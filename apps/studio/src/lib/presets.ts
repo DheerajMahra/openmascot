@@ -100,7 +100,8 @@ export const TRIGGER_KINDS: Array<{ id: TriggerKind; label: string }> = [
   { id: "click", label: "click" },
   { id: "hover", label: "hover" },
   { id: "interval", label: "every few seconds" },
-  { id: "custom", label: "my site sends…" }
+  // Named after the call that fires it, so the row reads like the page code.
+  { id: "custom", label: "Mascot.emit()" }
 ];
 
 export const parseTrigger = (key: string | null): { kind: TriggerKind | null; param: string } => {
@@ -111,10 +112,35 @@ export const parseTrigger = (key: string | null): { kind: TriggerKind | null; pa
   return { kind: null, param: "" };
 };
 
+/** Event name a new Mascot.emit() trigger starts with. */
+export const DEFAULT_EVENT = "success";
+/** Seconds a new "every few seconds" trigger starts with. */
+export const DEFAULT_INTERVAL = 6;
+
 export const buildTrigger = (kind: TriggerKind, param: string): string => {
-  if (kind === "interval") return `interval:${param || "8"}`;
-  if (kind === "custom") return `custom:${param || "event"}`;
+  if (kind === "interval") return `interval:${param || DEFAULT_INTERVAL}`;
+  if (kind === "custom") return `custom:${param || DEFAULT_EVENT}`;
   return kind;
+};
+
+/**
+ * The default key for a kind, bumped until no trigger in `taken` uses it, so a second
+ * Mascot.emit() row becomes "custom:success-2" and a second interval "interval:7".
+ */
+export const uniqueTrigger = (kind: TriggerKind, taken: Record<string, unknown>): string => {
+  const first = buildTrigger(kind, "");
+  if (!(first in taken)) return first;
+  if (kind === "custom") {
+    let n = 2;
+    while (`custom:${DEFAULT_EVENT}-${n}` in taken) n++;
+    return `custom:${DEFAULT_EVENT}-${n}`;
+  }
+  if (kind === "interval") {
+    let secs = DEFAULT_INTERVAL + 1;
+    while (`interval:${secs}` in taken) secs++;
+    return `interval:${secs}`;
+  }
+  return first;
 };
 
 /** Two or three words on one trigger, for the moves list: "on click", "every 9 s". */
