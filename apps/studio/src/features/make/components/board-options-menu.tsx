@@ -13,7 +13,7 @@ import {
 import { IconButton } from "@/components/ui/icon-button";
 import { useBoardOptions, useEditorSelection, useMascotDispatch } from "@/lib/mascot-store";
 
-/** The ⋯ menu: board guides, plus resetting or clearing the current pose. */
+/** The ⋯ menu: the center lines guide, plus resetting or clearing the current pose. */
 export const BoardOptionsMenu = () => {
   const dispatch = useMascotDispatch();
   const board = useBoardOptions();
@@ -32,14 +32,6 @@ export const BoardOptionsMenu = () => {
           }
         >
           Center lines
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={board.groundLine}
-          onCheckedChange={value =>
-            dispatch({ type: "set-board-option", option: "groundLine", value })
-          }
-        >
-          Ground line
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

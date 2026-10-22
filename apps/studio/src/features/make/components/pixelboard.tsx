@@ -13,7 +13,6 @@ import {
   useMascotDoc
 } from "@/lib/mascot-store";
 import { colorChar, normalizePose } from "@/lib/pose-utils";
-import { cn } from "@/lib/utils";
 
 export const CELL = 20;
 const GROUND = "#f6f2ec";
@@ -117,10 +116,7 @@ export const Pixelboard = () => {
           width={w * CELL}
           height={h * CELL}
           aria-label={`Pose canvas, ${w} by ${h} cells, editing pose ${poseName}`}
-          className={cn(
-            "block max-w-full cursor-crosshair touch-none border border-stage-text",
-            board.groundLine && "border-b-2 border-b-muted"
-          )}
+          className="block max-w-full cursor-crosshair touch-none border border-stage-text"
           style={{ width: w * CELL, height: "auto", aspectRatio: `${w} / ${h}` }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -128,11 +124,9 @@ export const Pixelboard = () => {
           onPointerCancel={onPointerUp}
           onContextMenu={e => e.preventDefault()}
         />
-        {board.groundLine && (
-          <span className="absolute right-1 bottom-1.5 rounded-sm bg-white/80 px-1 font-mono text-[10px] text-muted">
-            ground
-          </span>
-        )}
+        <span className="absolute right-1 bottom-1.5 rounded-sm bg-white/80 px-1 font-mono text-[10px] text-muted">
+          ground
+        </span>
       </div>
       <span className="font-mono text-xs text-muted">
         Left click paint · right click erase · drag

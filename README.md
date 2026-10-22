@@ -36,7 +36,7 @@ The studio is a three-step flow, **Make → Animate → Share**, reached from a 
 - Draw on a fixed 24 × 16 pixel board: left click paints, right click erases, dragging paints continuously.
 - Pick and edit the mascot's colors (up to 36).
 - Create, rename and switch between **poses** (for example `default`, `look-left`, `arms-up`, `blink`). A `default` pose always exists.
-- Board menu: toggle center lines and ground line, reset to the default pose, clear the pose.
+- Board menu: toggle center lines, reset to the default pose, clear the pose.
 - Short tips that help first-time users draw a good character.
 - A live preview showing exactly what a site will show, resting on the default pose while the user draws, with buttons to try each move.
 

@@ -20,7 +20,6 @@ export type Tool = "pencil" | "mirror" | "eraser" | "fill";
 
 export interface BoardOptions {
   centerLines: boolean;
-  groundLine: boolean;
 }
 
 export interface MascotState {
@@ -108,7 +107,7 @@ const initialState: MascotState = {
   history: [],
   future: [],
   hydrated: false,
-  board: { centerLines: true, groundLine: true }
+  board: { centerLines: true }
 };
 
 /** A new document version: pushes history, clears redo, marks unsaved. */

@@ -7,7 +7,7 @@ import { IconButton } from "@/components/ui/icon-button";
 import { cn } from "@/lib/utils";
 
 const TIPS = [
-  "Start where the center lines cross and grow outward. Keep the feet on the ground line.",
+  "Start where the center lines cross and grow outward. Keep the feet on the ground.",
   "Eyes two cells wide with a gap between them read best at this size. Big eyes, small mouth.",
   "Right click erases. Drag to paint a run of cells. Fill paints a whole connected area.",
   "Poses are small edits of default: move the eyes a cell, raise the arms. Add one from the Poses list."
