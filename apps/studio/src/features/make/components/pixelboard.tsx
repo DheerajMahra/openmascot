@@ -5,6 +5,7 @@ import type { PointerEvent } from "react";
 import { EMPTY_CELL } from "@openmascot/embed";
 import { useEffect, useRef } from "react";
 
+import { useDeviceSize } from "@/features/make/hooks/use-device-size";
 import {
   useBoardOptions,
   useEditorSelection,
@@ -30,47 +31,50 @@ export const Pixelboard = () => {
   const pose = normalizePose(doc.poses[poseName] ?? "", w, h);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stroke = useRef<{ ch: string; mirror: boolean } | null>(null);
+  // Draw at exactly the on-screen size so the browser never rescales the canvas:
+  // a rescaled canvas drops 1px grid lines and makes them flicker.
+  const size = useDeviceSize(canvasRef);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas || !ctx || !size) return;
+    canvas.width = size.width;
+    canvas.height = size.height;
+    // Cell edges snapped to whole device pixels, so cells tile without seams and lines stay crisp.
+    const px = (x: number) => Math.round((x / w) * size.width);
+    const py = (y: number) => Math.round((y / h) * size.height);
+    // One CSS pixel, in device pixels.
+    const line = Math.max(1, Math.round(size.width / (w * CELL)));
     ctx.fillStyle = GROUND;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, size.width, size.height);
     for (let i = 0; i < w * h; i++) {
       const ch = pose[i];
       if (!ch || ch === EMPTY_CELL) continue;
+      const x = i % w;
+      const y = Math.floor(i / w);
       ctx.fillStyle = doc.palette[parseInt(ch, 36)] ?? "#000";
-      ctx.fillRect((i % w) * CELL, Math.floor(i / w) * CELL, CELL, CELL);
+      ctx.fillRect(px(x), py(y), px(x + 1) - px(x), py(y + 1) - py(y));
     }
-    ctx.strokeStyle = GRID;
-    ctx.lineWidth = 1;
-    ctx.setLineDash([]);
-    ctx.beginPath();
-    for (let x = 0; x <= w; x++) {
-      ctx.moveTo(x * CELL + 0.5, 0);
-      ctx.lineTo(x * CELL + 0.5, h * CELL);
-    }
-    for (let y = 0; y <= h; y++) {
-      ctx.moveTo(0, y * CELL + 0.5);
-      ctx.lineTo(w * CELL, y * CELL + 0.5);
-    }
-    ctx.stroke();
+    // The outer edge is the wrapper's CSS border, so only the inner lines are drawn.
+    ctx.fillStyle = GRID;
+    for (let x = 1; x < w; x++) ctx.fillRect(px(x), 0, line, size.height);
+    for (let y = 1; y < h; y++) ctx.fillRect(0, py(y), size.width, line);
     if (board.centerLines) {
       // The middle grid lines themselves, redrawn dotted and a little darker.
-      const cx = (w / 2) * CELL + 0.5;
-      const cy = (h / 2) * CELL + 0.5;
+      const cx = px(w / 2) + line / 2;
+      const cy = py(h / 2) + line / 2;
       ctx.strokeStyle = CENTER;
-      ctx.setLineDash([2, 3]);
+      ctx.lineWidth = line;
+      ctx.setLineDash([2 * line, 3 * line]);
       ctx.beginPath();
       ctx.moveTo(cx, 0);
-      ctx.lineTo(cx, h * CELL);
+      ctx.lineTo(cx, size.height);
       ctx.moveTo(0, cy);
-      ctx.lineTo(w * CELL, cy);
+      ctx.lineTo(size.width, cy);
       ctx.stroke();
-      ctx.setLineDash([]);
     }
-  }, [pose, doc.palette, w, h, board.centerLines]);
+  }, [pose, doc.palette, w, h, board.centerLines, size]);
 
   const cellAt = (e: PointerEvent<HTMLCanvasElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -109,15 +113,14 @@ export const Pixelboard = () => {
   };
 
   return (
-    <div className="flex w-[480px] max-w-full min-w-0 flex-col gap-2.5">
-      <div className="relative">
+    // The border lives on the wrapper, not the canvas, so it never eats into the drawing.
+    <div className="flex max-w-full min-w-0 flex-col gap-2.5" style={{ width: w * CELL + 2 }}>
+      <div className="relative border border-stage-text">
         <canvas
           ref={canvasRef}
-          width={w * CELL}
-          height={h * CELL}
           aria-label={`Pose canvas, ${w} by ${h} cells, editing pose ${poseName}`}
-          className="block max-w-full cursor-crosshair touch-none border border-stage-text"
-          style={{ width: w * CELL, height: "auto", aspectRatio: `${w} / ${h}` }}
+          className="block w-full cursor-crosshair touch-none"
+          style={{ aspectRatio: `${w} / ${h}` }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
