@@ -16,7 +16,7 @@ import { blankPose, floodFill, newId, normalizePose, setCell } from "@/lib/pose-
 import { loadCurrent, saveCurrent } from "@/lib/storage";
 import clawdJson from "@/samples/clawd.json";
 
-export type Tool = "pencil" | "eraser" | "fill";
+export type Tool = "pencil" | "mirror" | "eraser" | "fill";
 
 export interface BoardOptions {
   centerLines: boolean;
@@ -46,7 +46,16 @@ export type MascotAction =
   | { type: "set-palette"; index: number; hex: string; commit: boolean }
   | { type: "add-color"; hex: string }
   | { type: "paint"; pose: string; value: string; commit: boolean }
-  | { type: "paint-cell"; pose: string; x: number; y: number; ch: string; commit: boolean }
+  | {
+      type: "paint-cell";
+      pose: string;
+      x: number;
+      y: number;
+      ch: string;
+      commit: boolean;
+      /** Also paint the cell reflected across the vertical center line. */
+      mirror?: boolean;
+    }
   | { type: "fill-cell"; pose: string; x: number; y: number; ch: string }
   | { type: "reset-pose"; name: string }
   | { type: "clear-pose"; name: string }
@@ -216,7 +225,8 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       return withDoc(s, { ...doc, poses: { ...doc.poses, [a.pose]: a.value } }, a.commit);
     case "paint-cell": {
       const before = normalizePose(doc.poses[a.pose] ?? "", w, h);
-      const value = setCell(before, w, a.x, a.y, a.ch);
+      let value = setCell(before, w, a.x, a.y, a.ch);
+      if (a.mirror) value = setCell(value, w, w - 1 - a.x, a.y, a.ch);
       if (value === before && !a.commit) return s;
       return withDoc(s, { ...doc, poses: { ...doc.poses, [a.pose]: value } }, a.commit);
     }

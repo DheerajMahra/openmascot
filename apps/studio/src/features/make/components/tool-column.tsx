@@ -3,7 +3,14 @@
 import type { Tool } from "@/lib/mascot-store";
 import type { LucideIcon } from "lucide-react";
 
-import { EraserIcon, PaintRollerIcon, PencilIcon, Redo2Icon, Undo2Icon } from "lucide-react";
+import {
+  EraserIcon,
+  PaintRollerIcon,
+  PencilIcon,
+  Redo2Icon,
+  TrianglesCenterlineDashedVerticalIcon,
+  Undo2Icon
+} from "lucide-react";
 
 import { IconButton } from "@/components/ui/icon-button";
 import { BoardOptionsMenu } from "@/features/make/components/board-options-menu";
@@ -11,6 +18,7 @@ import { useEditorTool, useMascotDispatch, useUndoAvailability } from "@/lib/mas
 
 const TOOLS: Array<{ id: Tool; label: string; Icon: LucideIcon }> = [
   { id: "pencil", label: "Pencil", Icon: PencilIcon },
+  { id: "mirror", label: "Mirror pencil", Icon: TrianglesCenterlineDashedVerticalIcon },
   { id: "eraser", label: "Eraser", Icon: EraserIcon },
   { id: "fill", label: "Fill", Icon: PaintRollerIcon }
 ];

@@ -30,7 +30,7 @@ export const Pixelboard = () => {
   const { w, h } = doc.grid;
   const pose = normalizePose(doc.poses[poseName] ?? "", w, h);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const stroke = useRef<{ ch: string } | null>(null);
+  const stroke = useRef<{ ch: string; mirror: boolean } | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -91,15 +91,18 @@ export const Pixelboard = () => {
       return;
     }
     e.currentTarget.setPointerCapture(e.pointerId);
-    stroke.current = { ch };
-    dispatch({ type: "paint-cell", pose: poseName, ...cell, ch, commit: true });
+    // Mirror strokes (paint and right-click erase) land on both sides of the center line.
+    const mirror = tool === "mirror";
+    stroke.current = { ch, mirror };
+    dispatch({ type: "paint-cell", pose: poseName, ...cell, ch, commit: true, mirror });
   };
 
   const onPointerMove = (e: PointerEvent<HTMLCanvasElement>) => {
     if (!stroke.current) return;
     const cell = cellAt(e);
     if (!cell) return;
-    dispatch({ type: "paint-cell", pose: poseName, ...cell, ch: stroke.current.ch, commit: false });
+    const { ch, mirror } = stroke.current;
+    dispatch({ type: "paint-cell", pose: poseName, ...cell, ch, commit: false, mirror });
   };
 
   const onPointerUp = () => {
