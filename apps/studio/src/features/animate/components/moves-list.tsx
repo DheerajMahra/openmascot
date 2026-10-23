@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectableItem } from "@/components/editor/selectable-item";
+import { SelectableItem, scrollIntoView } from "@/components/editor/selectable-item";
 import { EditorSidebar, SidebarList } from "@/components/layout/editor-shell";
 import { MascotNameField } from "@/components/mascot/mascot-name-field";
 import { InfoTip } from "@/components/ui/info-tip";
@@ -37,6 +37,7 @@ export const MovesList = () => {
         {Object.keys(doc.sequences).map(name => (
           <SelectableItem
             key={name}
+            ref={name === seqName ? scrollIntoView : undefined}
             selected={name === seqName}
             onClick={() => dispatch({ type: "select-seq", name })}
             className="justify-between gap-2 px-3 py-2.5"

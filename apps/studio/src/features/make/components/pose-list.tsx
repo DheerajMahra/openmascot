@@ -2,7 +2,7 @@
 
 import { PlusIcon } from "lucide-react";
 
-import { SelectableItem } from "@/components/editor/selectable-item";
+import { SelectableItem, scrollIntoView } from "@/components/editor/selectable-item";
 import { SidebarList } from "@/components/layout/editor-shell";
 import { MascotStage } from "@/components/mascot/mascot-stage";
 import { MascotThumb } from "@/components/mascot/mascot-thumb";
@@ -30,6 +30,7 @@ export const PoseList = () => {
         {Object.keys(doc.poses).map(name => (
           <SelectableItem
             key={name}
+            ref={name === poseName ? scrollIntoView : undefined}
             selected={name === poseName}
             onClick={() => dispatch({ type: "select-pose", name })}
             className="px-2 py-1.5 font-mono text-[13px]"
