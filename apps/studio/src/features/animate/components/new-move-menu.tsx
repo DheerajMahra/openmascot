@@ -10,20 +10,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useEditorSelection, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
+import { useEditorSelection, useMascotDispatch } from "@/lib/mascot-store";
 import { MOVE_PRESETS } from "@/lib/presets";
 
 /** "+ New move…" menu: a preset, a copy of the current move, or an empty one. */
 export const NewMoveMenu = () => {
   const dispatch = useMascotDispatch();
   const { seqName } = useEditorSelection();
-  const poses = useMascotSelector(s => s.doc.poses);
 
   const addPreset = (id: string) => {
     const preset = MOVE_PRESETS.find(p => p.id === id);
     if (!preset) return;
     const name = id === "empty" ? "new-move" : id;
-    dispatch({ type: "add-seq", name, frames: preset.build(Object.keys(poses)) });
+    dispatch({ type: "add-seq", name, frames: preset.frames });
   };
 
   return (

@@ -12,82 +12,36 @@ export const secondsOf = (frames: MascotFrame[], tick: number): string =>
 export interface MovePreset {
   id: string;
   label: string;
-  /** Builds frames from the poses this mascot actually has. */
-  build: (poses: string[]) => MascotFrame[];
+  frames: MascotFrame[];
 }
 
-/** Prefer a pose whose name matches, else fall back to default. */
-const pick = (poses: string[], ...wanted: string[]): string => {
-  for (const w of wanted) {
-    const hit = poses.find(p => p === w || p.includes(w));
-    if (hit) return hit;
-  }
-  return "default";
-};
+/** One step of the default pose, moved `x` columns right and `offset` rows down. */
+const step = (hold: number, x = 0, offset = 0): MascotFrame => ({
+  pose: "default",
+  hold,
+  ...(x ? { x } : {}),
+  ...(offset ? { offset } : {})
+});
 
+/**
+ * Starting points for a new move. They only move the default pose up, down and sideways, so they
+ * work on any mascot: nothing assumes it has eyes, arms or poses with particular names.
+ */
 export const MOVE_PRESETS: MovePreset[] = [
-  {
-    id: "wave",
-    label: "Start from Wave",
-    build: poses => {
-      const up = pick(poses, "arms-up", "wave", "arm");
-      return [
-        { pose: up, hold: 3 },
-        { pose: "default", hold: 2 },
-        { pose: up, hold: 3 },
-        { pose: "default", hold: 1 }
-      ];
-    }
-  },
-  {
-    id: "jump",
-    label: "Start from Jump",
-    build: poses => {
-      const up = pick(poses, "arms-up", "jump", "tall");
-      return [
-        { pose: "default", hold: 2, offset: 1, poof: "dot" },
-        { pose: up, hold: 3 },
-        { pose: "default", hold: 1 },
-        { pose: "default", hold: 2, offset: 1, poof: "wave" }
-      ];
-    }
-  },
-  {
-    id: "look-around",
-    label: "Start from Look around",
-    build: poses => [
-      { pose: pick(poses, "look-left", "left"), hold: 5 },
-      { pose: pick(poses, "look-right", "right"), hold: 5 },
-      { pose: "default", hold: 2 }
-    ]
-  },
   {
     id: "bounce",
     label: "Start from Bounce",
-    build: () => [
-      { pose: "default", hold: 2, offset: 1 },
-      { pose: "default", hold: 3 },
-      { pose: "default", hold: 2, offset: 1 },
-      { pose: "default", hold: 3 }
-    ]
+    frames: [step(2, 0, 1), step(3), step(2, 0, 1), step(3)]
   },
   {
-    id: "nod",
-    label: "Start from Nod",
-    build: poses => {
-      const happy = pick(poses, "happy", "blink", "wink");
-      return [
-        { pose: "default", hold: 3 },
-        { pose: happy, hold: 2, offset: 1 },
-        { pose: "default", hold: 3 },
-        { pose: happy, hold: 2, offset: 1 }
-      ];
-    }
+    id: "sway",
+    label: "Start from Sway",
+    frames: [step(4, -1), step(2), step(4, 1), step(2)]
   },
   {
     id: "empty",
     label: "Start empty",
-    build: () => [{ pose: "default", hold: 4 }]
+    frames: [step(4)]
   }
 ];
 
