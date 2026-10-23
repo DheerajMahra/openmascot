@@ -13,7 +13,14 @@ import {
   useSyncExternalStore
 } from "react";
 
-import { blankPose, floodFill, newId, normalizePose, setCell } from "@/lib/pose-utils";
+import {
+  blankPose,
+  floodFill,
+  newId,
+  normalizePose,
+  randomPaintColor,
+  setCell
+} from "@/lib/pose-utils";
 import { buildTrigger, uniqueTrigger } from "@/lib/presets";
 import { loadCurrent, saveCurrent } from "@/lib/storage";
 import clawdJson from "@/samples/clawd.json";
@@ -96,7 +103,7 @@ export const createBlankMascot = (): MascotDoc => {
     version: 1,
     grid,
     tick: 60,
-    palette: ["#141413", "#d97757", "#be684d", "#699acb"],
+    palette: [randomPaintColor()],
     poses: { default: blankPose(grid.w, grid.h) },
     sequences: { move: [{ pose: "default", hold: 4 }] },
     triggers: {}

@@ -43,7 +43,7 @@ export const StartingPoints = () => {
           </StartTileMedia>
           <StartTileBody
             title="Blank canvas"
-            description="24 × 16 grid, four colors, one move ready."
+            description="24 × 16 grid, one random color, one move ready."
           />
         </StartTile>
 

@@ -9,10 +9,13 @@ const W = 24;
 const INK = colorChar(1);
 const EMPTY = ".";
 
+/** Fixed colors, so tests don't depend on the blank mascot's random one. */
+const PALETTE = ["#141413", "#d97757", "#be684d", "#699acb"];
+
 /** A store holding a fresh blank mascot: one blank "default" pose, four colors, one move. */
 const setup = (): MascotStore => {
   const store = createMascotStore();
-  store.dispatch({ type: "replace-doc", doc: createBlankMascot() });
+  store.dispatch({ type: "replace-doc", doc: { ...createBlankMascot(), palette: PALETTE } });
   return store;
 };
 
@@ -483,4 +486,19 @@ describe("undo: starting over", () => {
   // Known limitation: ⌘Z while the mouse is still down folds the
   // rest of that stroke into the previous step.
   it.todo("keeps the rest of a stroke out of the previous step when undo is pressed mid-stroke");
+});
+
+describe("blank mascot", () => {
+  it("starts with a single color that isn't black", () => {
+    const { palette } = createBlankMascot();
+    expect(palette).toHaveLength(1);
+    expect(palette[0]).toMatch(/^#[0-9a-f]{6}$/);
+    expect(palette[0]).not.toBe("#000000");
+  });
+
+  it("paints with that color as soon as it opens", () => {
+    const store = createMascotStore();
+    store.dispatch({ type: "replace-doc", doc: createBlankMascot() });
+    expect(store.getState().colorIndex).toBe(0);
+  });
 });
