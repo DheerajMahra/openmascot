@@ -3,6 +3,16 @@ import type { FormEvent, HTMLAttributes, KeyboardEvent, ReactNode, Ref } from "r
 import { PencilIcon, Trash2Icon } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/icon-button";
 import { Input } from "@/components/ui/input";
@@ -48,16 +58,59 @@ interface ActionProps {
 }
 
 export const RenameAction = (props: ActionProps) => (
-  <IconButton size="sm" variant="muted" {...props}>
+  // The pencil and trash explain themselves; only a disabled one needs to say why.
+  <IconButton size="sm" variant="muted" tooltip={props.disabled ? "top" : undefined} {...props}>
     <PencilIcon size={13} />
   </IconButton>
 );
 
-export const DeleteAction = (props: ActionProps) => (
-  <IconButton size="sm" variant="muted" {...props}>
-    <Trash2Icon size={13} />
-  </IconButton>
-);
+interface DeleteActionProps {
+  label: string;
+  disabled?: boolean;
+  /** Asked before anything is deleted: what goes, and what happens to things that used it. */
+  confirm: { title: string; description: string };
+  onDelete: () => void;
+}
+
+/** Trash button that asks in an alert dialog before deleting. */
+export const DeleteAction = ({ label, disabled, confirm, onDelete }: DeleteActionProps) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <IconButton
+        size="sm"
+        variant="muted"
+        tooltip={disabled ? "top" : undefined}
+        label={label}
+        disabled={disabled}
+        onClick={() => setOpen(true)}
+        className="enabled:hover:border-danger enabled:hover:text-danger"
+      >
+        <Trash2Icon size={13} />
+      </IconButton>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogContent size="sm">
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirm.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirm.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => {
+                setOpen(false);
+                onDelete();
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+};
 
 interface RenameFormProps {
   kind: string;

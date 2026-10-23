@@ -17,7 +17,10 @@ export const buttonVariants = cva(
       variant: {
         primary: "border-ink bg-ink text-white hover:border-clay-deep hover:bg-clay-deep",
         secondary: "border-line bg-paper text-ink hover:border-clay",
-        dashed: "border-dashed border-stage-text bg-paper text-muted hover:border-clay"
+        dashed: "border-dashed border-stage-text bg-paper text-muted hover:border-clay",
+        /** For actions that delete something; only inside a confirm, never as a page's main button. */
+        destructive:
+          "border-danger bg-danger text-white hover:border-danger-deep hover:bg-danger-deep"
       },
       size: {
         md: "rounded-md px-3.5 py-2 text-[13px]",

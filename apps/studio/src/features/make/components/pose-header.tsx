@@ -41,12 +41,6 @@ export const PoseHeader = () => {
     return null;
   };
 
-  const remove = () => {
-    if (window.confirm(`Delete pose "${poseName}"? Moves using it fall back to default.`)) {
-      dispatch({ type: "delete-pose", name: poseName });
-    }
-  };
-
   return (
     <EntityHeader>
       {renaming === poseName ? (
@@ -73,7 +67,11 @@ export const PoseHeader = () => {
             <DeleteAction
               label={isDefault ? "The default pose can't be deleted" : "Delete pose"}
               disabled={isDefault}
-              onClick={remove}
+              confirm={{
+                title: `Delete pose "${poseName}"?`,
+                description: "Moves that use it will show the default pose instead."
+              }}
+              onDelete={() => dispatch({ type: "delete-pose", name: poseName })}
             />
           </EntityHeaderActions>
         </>

@@ -35,11 +35,11 @@ const iconButtonVariants = cva(
 
 export type IconButtonProps = ComponentProps<"button"> &
   VariantProps<typeof iconButtonVariants> & {
-    /** Accessible name, also shown as the tooltip. */
+    /** Accessible name, and the tooltip's text when there is one. */
     label: string;
     /** Set for toggle buttons; leaves aria-pressed off for plain actions. */
     active?: boolean;
-    /** Show the label in a styled tooltip on this side, instead of the browser's native one. */
+    /** Show the label in a styled tooltip on this side. Without it there is no tooltip, native or otherwise. */
     tooltip?: "top" | "right" | "bottom" | "left";
   };
 
@@ -57,16 +57,28 @@ export const IconButton = ({
     <button
       type="button"
       aria-label={label}
-      title={tooltip ? undefined : label}
       aria-pressed={active}
-      className={cn(iconButtonVariants({ variant, size, active: active ?? false }), className)}
+      className={cn(
+        iconButtonVariants({ variant, size, active: active ?? false }),
+        // A disabled button gets no pointer events, so the wrapper below takes the hover instead.
+        tooltip && "disabled:pointer-events-none",
+        className
+      )}
       {...rest}
     />
   );
   if (!tooltip) return button;
   return (
-    <Tooltip>
-      <TooltipTrigger render={button} />
+    // Keyed so the tooltip starts fresh when its trigger switches between the wrapper and the button.
+    <Tooltip key={rest.disabled ? "disabled" : "enabled"}>
+      {/* Disabled buttons often carry the reason in their label, so hover a wrapper to still show it. */}
+      {rest.disabled ? (
+        <TooltipTrigger render={<span className="inline-flex cursor-not-allowed" />}>
+          {button}
+        </TooltipTrigger>
+      ) : (
+        <TooltipTrigger render={button} />
+      )}
       <TooltipContent side={tooltip}>{label}</TooltipContent>
     </Tooltip>
   );

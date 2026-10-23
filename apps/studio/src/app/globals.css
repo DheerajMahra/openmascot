@@ -25,6 +25,8 @@
   --color-success-dot: #599036;
   --color-warning: #9a6a12;
   --color-warning-dot: #d49a2a;
+  --color-danger: #c4382a;
+  --color-danger-deep: #a32b1f;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 

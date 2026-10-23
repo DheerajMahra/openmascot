@@ -68,7 +68,6 @@ export const StepRow = ({
       <button
         type="button"
         aria-label={`Reorder pose ${n}: drag, or use the arrow keys`}
-        title="Drag to reorder"
         className="flex h-6 w-3.5 cursor-grab items-center justify-center border-0 bg-transparent p-0 text-stage-text hover:text-muted active:cursor-grabbing"
         {...handleProps}
       >
@@ -77,7 +76,6 @@ export const StepRow = ({
       <button
         type="button"
         aria-label={`Show pose ${n} in the preview`}
-        title="Show in the preview"
         onClick={onSelect}
         className={cn(
           "cursor-pointer border-0 bg-transparent p-0 text-left font-mono text-xs hover:text-clay",

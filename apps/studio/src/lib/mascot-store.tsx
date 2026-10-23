@@ -94,12 +94,14 @@ const CLAWD = clawdJson as unknown as MascotDoc;
 const MAX_HISTORY = 50;
 /** Pose cells hold one base-36 character per palette index. */
 export const MAX_COLORS = 36;
+/** What a mascot is called when its name is empty or only spaces. */
+export const UNTITLED = "Untitled";
 
 export const createBlankMascot = (): MascotDoc => {
   const grid = { w: 24, h: 16 };
   return {
     id: newId(),
-    name: "Untitled",
+    name: UNTITLED,
     version: 1,
     grid,
     tick: 60,
@@ -194,11 +196,19 @@ const omitKey = <T,>(obj: Record<string, T>, key: string): Record<string, T> => 
   return out;
 };
 
-/** Docs saved before moves stopped looping carry an "idle" trigger the runtime no longer reads. */
-const migrateDoc = (doc: MascotDoc): MascotDoc =>
-  "idle" in doc.triggers ? { ...doc, triggers: omitKey(doc.triggers, "idle") } : doc;
+/**
+ * Tidies a doc as it loads: docs saved before moves stopped looping carry an "idle" trigger the
+ * runtime no longer reads, and a name left blank (say, the page closed mid-edit) reads as Untitled.
+ */
+const migrateDoc = (doc: MascotDoc): MascotDoc => {
+  let next = doc;
+  if ("idle" in next.triggers) next = { ...next, triggers: omitKey(next.triggers, "idle") };
+  if (!next.name.trim()) next = { ...next, name: UNTITLED };
+  return next;
+};
 
-const slug = (name: string): string =>
+/** A move name as stored: lower case letters and digits joined by single "-". */
+export const toMoveName = (name: string): string =>
   name
     .trim()
     .toLowerCase()
@@ -371,9 +381,9 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       };
     }
     case "add-seq": {
-      let name = slug(a.name) || "move";
+      let name = toMoveName(a.name) || "move";
       let n = 2;
-      while (name in doc.sequences) name = `${slug(a.name) || "move"}-${n++}`;
+      while (name in doc.sequences) name = `${toMoveName(a.name) || "move"}-${n++}`;
       const frames = a.frames
         ? a.frames.map(f => ({ ...f }))
         : a.from
@@ -386,7 +396,7 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       };
     }
     case "rename-seq": {
-      const to = slug(a.to);
+      const to = toMoveName(a.to);
       if (!to || to === a.from || to in doc.sequences) return s;
       const triggers: MascotDoc["triggers"] = {};
       for (const [k, v] of Object.entries(doc.triggers)) triggers[k] = v === a.from ? to : v;

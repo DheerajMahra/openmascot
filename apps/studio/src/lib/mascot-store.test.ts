@@ -502,3 +502,19 @@ describe("blank mascot", () => {
     expect(store.getState().colorIndex).toBe(0);
   });
 });
+
+describe("mascot name", () => {
+  it("is Untitled when a mascot loads with a blank or spaces-only name", () => {
+    for (const name of ["", "   "]) {
+      const store = createMascotStore();
+      store.dispatch({ type: "hydrate", doc: { ...createBlankMascot(), name } });
+      expect(store.getState().doc.name).toBe("Untitled");
+    }
+  });
+
+  it("can be blank while it is being typed", () => {
+    const store = setup();
+    store.dispatch({ type: "set-name", name: "" });
+    expect(store.getState().doc.name).toBe("");
+  });
+});

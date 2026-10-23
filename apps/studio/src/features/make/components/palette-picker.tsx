@@ -68,7 +68,6 @@ export const PalettePicker = () => {
               type="color"
               value={hex}
               aria-label={`Color ${i + 1}${selected ? ", selected" : ""}`}
-              title={selected ? "Click again to change this color" : "Paint with this color"}
               ref={endPickOnChange()}
               onClick={e => onSwatchClick(e, i)}
               onChange={e => onPick(e.target.value, i)}
@@ -83,10 +82,7 @@ export const PalettePicker = () => {
           );
         })}
         {palette.length < MAX_COLORS && (
-          <label
-            title="Add a color"
-            className="relative flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-stage-text bg-paper text-lg text-muted hover:border-clay"
-          >
+          <label className="relative flex size-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-dashed border-stage-text bg-paper text-lg text-muted hover:border-clay">
             <PlusIcon size={16} />
             <input
               type="color"
