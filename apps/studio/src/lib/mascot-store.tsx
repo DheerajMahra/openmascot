@@ -24,14 +24,19 @@ export interface BoardOptions {
   centerLines: boolean;
 }
 
+/** One undo step: a pose's pixels or one palette slot, before and after. Undo tracks drawing only. */
+export type MascotEdit =
+  | { kind: "pixels"; pose: string; before: string; after: string }
+  | { kind: "color"; index: number; before: string; after: string };
+
 export interface MascotState {
   doc: MascotDoc;
   poseName: string;
   seqName: string;
   tool: Tool;
   colorIndex: number;
-  history: MascotDoc[];
-  future: MascotDoc[];
+  history: MascotEdit[];
+  future: MascotEdit[];
   hydrated: boolean;
   board: BoardOptions;
 }
@@ -112,13 +117,63 @@ const initialState: MascotState = {
   board: { centerLines: true }
 };
 
-/** A new document version: pushes history, clears redo, marks unsaved. */
-const withDoc = (s: MascotState, doc: MascotDoc, commit = true): MascotState => ({
-  ...s,
-  doc,
-  history: commit ? [...s.history.slice(-(MAX_HISTORY - 1)), s.doc] : s.history,
-  future: commit ? [] : s.future
-});
+/** A gesture that changed nothing, like a click on a cell already that color. Only the top entry can be one. */
+const isEmptyEdit = (e: MascotEdit): boolean => e.before === e.after;
+
+const sameTarget = (a: MascotEdit, b: MascotEdit): boolean =>
+  a.kind === "pixels"
+    ? b.kind === "pixels" && a.pose === b.pose
+    : b.kind === "color" && a.index === b.index;
+
+/** History without an empty entry on top. */
+const settled = (history: MascotEdit[]): MascotEdit[] => {
+  const top = history[history.length - 1];
+  return top && isEmptyEdit(top) ? history.slice(0, -1) : history;
+};
+
+/**
+ * Records a drawing edit. A commit starts a new step; later ticks of the same gesture stretch it,
+ * and a tick with no matching step (tuning a just-added color) goes unrecorded. Redo is dropped
+ * once the step actually changes something.
+ */
+const record = (
+  s: MascotState,
+  edit: MascotEdit,
+  commit: boolean
+): Pick<MascotState, "history" | "future"> => {
+  if (commit) {
+    const history = [...settled(s.history).slice(-(MAX_HISTORY - 1)), edit];
+    return { history, future: isEmptyEdit(edit) ? s.future : [] };
+  }
+  const top = s.history[s.history.length - 1];
+  if (!top || !sameTarget(top, edit)) return { history: s.history, future: s.future };
+  const stretched = { ...top, after: edit.after };
+  return {
+    history: [...s.history.slice(0, -1), stretched],
+    future: isEmptyEdit(stretched) ? s.future : []
+  };
+};
+
+/** New pixels for a pose, recorded for undo. */
+const withPixels = (s: MascotState, pose: string, value: string, commit = true): MascotState => {
+  const { w, h } = s.doc.grid;
+  const before = normalizePose(s.doc.poses[pose] ?? "", w, h);
+  const doc = { ...s.doc, poses: { ...s.doc.poses, [pose]: value } };
+  return { ...s, doc, ...record(s, { kind: "pixels", pose, before, after: value }, commit) };
+};
+
+/** Puts one side of an edit back into the current doc. Pixel edits bring their pose onto the board. */
+const applyEdit = (s: MascotState, edit: MascotEdit, value: string): MascotState => {
+  if (edit.kind === "color") {
+    const palette = s.doc.palette.map((c, i) => (i === edit.index ? value : c));
+    return { ...s, doc: { ...s.doc, palette } };
+  }
+  return {
+    ...s,
+    doc: { ...s.doc, poses: { ...s.doc.poses, [edit.pose]: value } },
+    poseName: edit.pose
+  };
+};
 
 const renameKey = <T,>(obj: Record<string, T>, from: string, to: string): Record<string, T> => {
   const out: Record<string, T> = {};
@@ -187,6 +242,8 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
         ...s,
         doc: next,
         seqName: s.seqName in next.sequences ? s.seqName : firstSeq(next),
+        history: [],
+        future: [],
         hydrated: true
       };
     }
@@ -213,46 +270,45 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "set-color":
       return { ...s, colorIndex: a.index };
     case "set-palette": {
-      if (doc.palette[a.index] === undefined || doc.palette[a.index] === a.hex) return s;
+      const before = doc.palette[a.index];
+      // A pick that starts on the same color still opens its undo step, so its later ticks have one to stretch.
+      if (before === undefined || (before === a.hex && !a.commit)) return s;
       // Poses point at palette slots, so every pixel painted with this color changes with it.
       const palette = doc.palette.map((c, i) => (i === a.index ? a.hex : c));
-      return withDoc(s, { ...doc, palette }, a.commit);
+      const edit: MascotEdit = { kind: "color", index: a.index, before, after: a.hex };
+      return { ...s, doc: { ...doc, palette }, ...record(s, edit, a.commit) };
     }
     case "add-color": {
       if (doc.palette.length >= MAX_COLORS) return s;
       const palette = [...doc.palette, a.hex];
-      return { ...withDoc(s, { ...doc, palette }), colorIndex: palette.length - 1 };
+      return { ...s, doc: { ...doc, palette }, colorIndex: palette.length - 1 };
     }
     case "paint":
-      return withDoc(s, { ...doc, poses: { ...doc.poses, [a.pose]: a.value } }, a.commit);
+      return withPixels(s, a.pose, a.value, a.commit);
     case "paint-cell": {
       const before = normalizePose(doc.poses[a.pose] ?? "", w, h);
       let value = setCell(before, w, a.x, a.y, a.ch);
       if (a.mirror) value = setCell(value, w, w - 1 - a.x, a.y, a.ch);
       if (value === before && !a.commit) return s;
-      return withDoc(s, { ...doc, poses: { ...doc.poses, [a.pose]: value } }, a.commit);
+      return withPixels(s, a.pose, value, a.commit);
     }
     case "fill-cell": {
       const before = normalizePose(doc.poses[a.pose] ?? "", w, h);
       const value = floodFill(before, w, h, a.x, a.y, a.ch);
       if (value === before) return s;
-      return withDoc(s, { ...doc, poses: { ...doc.poses, [a.pose]: value } });
+      return withPixels(s, a.pose, value);
     }
     case "reset-pose": {
       if (a.name === "default") return s;
-      const value = normalizePose(doc.poses["default"] ?? "", w, h);
-      return withDoc(s, { ...doc, poses: { ...doc.poses, [a.name]: value } });
+      return withPixels(s, a.name, normalizePose(doc.poses["default"] ?? "", w, h));
     }
     case "clear-pose":
-      return withDoc(s, { ...doc, poses: { ...doc.poses, [a.name]: blankPose(w, h) } });
+      return withPixels(s, a.name, blankPose(w, h));
     case "add-pose": {
       const name = a.name === undefined ? nextPoseName(doc.poses) : toPoseName(a.name);
       if (!name || name in doc.poses) return s;
       const value = normalizePose(doc.poses[a.from ?? "default"] ?? "", w, h);
-      return {
-        ...withDoc(s, { ...doc, poses: { ...doc.poses, [name]: value } }),
-        poseName: name
-      };
+      return { ...s, doc: { ...doc, poses: { ...doc.poses, [name]: value } }, poseName: name };
     }
     case "rename-pose": {
       const to = toPoseName(a.to);
@@ -261,9 +317,15 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       for (const [k, seq] of Object.entries(doc.sequences)) {
         sequences[k] = seq.map(f => (f.pose === a.from ? { ...f, pose: to } : f));
       }
+      // Undo steps follow the pose to its new name.
+      const rename = (e: MascotEdit): MascotEdit =>
+        e.kind === "pixels" && e.pose === a.from ? { ...e, pose: to } : e;
       return {
-        ...withDoc(s, { ...doc, poses: renameKey(doc.poses, a.from, to), sequences }),
-        poseName: s.poseName === a.from ? to : s.poseName
+        ...s,
+        doc: { ...doc, poses: renameKey(doc.poses, a.from, to), sequences },
+        poseName: s.poseName === a.from ? to : s.poseName,
+        history: s.history.map(rename),
+        future: s.future.map(rename)
       };
     }
     case "delete-pose": {
@@ -272,31 +334,33 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       for (const [k, seq] of Object.entries(doc.sequences)) {
         sequences[k] = seq.map(f => (f.pose === a.name ? { ...f, pose: "default" } : f));
       }
+      // Deleting is final: the pose's undo steps go with it.
+      const keep = (e: MascotEdit) => e.kind !== "pixels" || e.pose !== a.name;
       return {
-        ...withDoc(s, { ...doc, poses: omitKey(doc.poses, a.name), sequences }),
-        poseName: s.poseName === a.name ? "default" : s.poseName
+        ...s,
+        doc: { ...doc, poses: omitKey(doc.poses, a.name), sequences },
+        poseName: s.poseName === a.name ? "default" : s.poseName,
+        history: s.history.filter(keep),
+        future: s.future.filter(keep)
       };
     }
     case "undo": {
-      const prev = s.history[s.history.length - 1];
-      if (!prev) return s;
+      const history = settled(s.history);
+      const edit = history[history.length - 1];
+      if (!edit) return s;
       return {
-        ...s,
-        doc: prev,
-        colorIndex: Math.min(s.colorIndex, prev.palette.length - 1),
-        history: s.history.slice(0, -1),
-        future: [s.doc, ...s.future].slice(0, MAX_HISTORY)
+        ...applyEdit(s, edit, edit.before),
+        history: history.slice(0, -1),
+        future: [edit, ...s.future].slice(0, MAX_HISTORY)
       };
     }
     case "redo": {
-      const next = s.future[0];
-      if (!next) return s;
+      const edit = s.future[0];
+      if (!edit) return s;
       return {
-        ...s,
-        doc: next,
-        colorIndex: Math.min(s.colorIndex, next.palette.length - 1),
+        ...applyEdit(s, edit, edit.after),
         future: s.future.slice(1),
-        history: [...s.history.slice(-(MAX_HISTORY - 1)), s.doc]
+        history: [...settled(s.history).slice(-(MAX_HISTORY - 1)), edit]
       };
     }
     case "add-seq": {
@@ -309,7 +373,8 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
           ? (doc.sequences[a.from] ?? []).map(f => ({ ...f }))
           : [{ pose: "default", hold: 4 }];
       return {
-        ...withDoc(s, { ...doc, sequences: { ...doc.sequences, [name]: frames } }),
+        ...s,
+        doc: { ...doc, sequences: { ...doc.sequences, [name]: frames } },
         seqName: name
       };
     }
@@ -319,7 +384,8 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       const triggers: MascotDoc["triggers"] = {};
       for (const [k, v] of Object.entries(doc.triggers)) triggers[k] = v === a.from ? to : v;
       return {
-        ...withDoc(s, { ...doc, sequences: renameKey(doc.sequences, a.from, to), triggers }),
+        ...s,
+        doc: { ...doc, sequences: renameKey(doc.sequences, a.from, to), triggers },
         seqName: s.seqName === a.from ? to : s.seqName
       };
     }
@@ -330,7 +396,8 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       for (const [k, v] of Object.entries(doc.triggers)) if (v !== a.name) triggers[k] = v;
       const sequences = omitKey(doc.sequences, a.name);
       return {
-        ...withDoc(s, { ...doc, sequences, triggers }),
+        ...s,
+        doc: { ...doc, sequences, triggers },
         seqName: s.seqName === a.name ? firstSeq({ ...doc, sequences }) : s.seqName
       };
     }
@@ -338,20 +405,20 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       const seq = doc.sequences[a.seq];
       if (!seq) return s;
       const frames = seq.map((f, i) => (i === a.index ? { ...f, ...a.frame } : f));
-      return withDoc(s, { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } });
+      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
     }
     case "add-frame": {
       const seq = doc.sequences[a.seq];
       if (!seq) return s;
       const last = seq[seq.length - 1];
       const frames = [...seq, a.frame ?? { pose: last?.pose ?? "default", hold: 4 }];
-      return withDoc(s, { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } });
+      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
     }
     case "remove-frame": {
       const seq = doc.sequences[a.seq];
       if (!seq || seq.length <= 1) return s;
       const frames = seq.filter((_, i) => i !== a.index);
-      return withDoc(s, { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } });
+      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
     }
     case "move-frame": {
       const seq = doc.sequences[a.seq];
@@ -363,7 +430,7 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       const frames = seq.slice();
       frames[a.index] = other;
       frames[j] = current;
-      return withDoc(s, { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } });
+      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
     }
     case "reorder-frame": {
       const seq = doc.sequences[a.seq];
@@ -372,12 +439,12 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       if (!moving || a.to < 0 || a.to >= seq.length) return s;
       const frames = seq.filter((_, i) => i !== a.from);
       frames.splice(a.to, 0, moving);
-      return withDoc(s, { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } });
+      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
     }
     case "add-trigger": {
       if (!(a.seq in doc.sequences)) return s;
       const key = freeTriggerKey(doc.triggers);
-      return withDoc(s, { ...doc, triggers: { ...doc.triggers, [key]: a.seq } });
+      return { ...s, doc: { ...doc, triggers: { ...doc.triggers, [key]: a.seq } } };
     }
     case "replace-trigger": {
       // Keys are unique, so a row can't take a "when" another row already has.
@@ -391,11 +458,11 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
         } else triggers[k] = v;
       }
       if (!found) triggers[a.to] = a.seq;
-      return withDoc(s, { ...doc, triggers });
+      return { ...s, doc: { ...doc, triggers } };
     }
     case "remove-trigger":
       if (!(a.key in doc.triggers)) return s;
-      return withDoc(s, { ...doc, triggers: omitKey(doc.triggers, a.key) });
+      return { ...s, doc: { ...doc, triggers: omitKey(doc.triggers, a.key) } };
     case "set-board-option":
       return { ...s, board: { ...s.board, [a.option]: a.value } };
     default:
@@ -497,7 +564,12 @@ export const useEditorTool = (): { tool: Tool; colorIndex: number } => ({
 
 export const useBoardOptions = (): BoardOptions => useMascotSelector(s => s.board);
 
+/** Whether undo has a step that changes something; the top one can be an empty click. */
+export const canUndo = (s: MascotState): boolean => s.history.some(e => !isEmptyEdit(e));
+
+export const canRedo = (s: MascotState): boolean => s.future.length > 0;
+
 export const useUndoAvailability = (): { canUndo: boolean; canRedo: boolean } => ({
-  canUndo: useMascotSelector(s => s.history.length > 0),
-  canRedo: useMascotSelector(s => s.future.length > 0)
+  canUndo: useMascotSelector(canUndo),
+  canRedo: useMascotSelector(canRedo)
 });

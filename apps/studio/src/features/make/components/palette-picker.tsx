@@ -21,7 +21,7 @@ export const PalettePicker = () => {
   const dispatch = useMascotDispatch();
   const palette = useMascotSelector(s => s.doc.palette);
   const { colorIndex } = useEditorTool();
-  // A color picker reports every drag tick. The first tick of a pick adds or changes a swatch and
+  // A color picker reports every drag tick. The first tick of a pick adds a swatch, or changes one and
   // makes one undo step; the rest update that swatch. The native change event ends the pick.
   const picking = useRef<number | null>(null);
 
