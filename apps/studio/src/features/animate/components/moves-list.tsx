@@ -16,7 +16,7 @@ import {
 import { describeTriggers } from "@/lib/presets";
 
 const MOVES_HELP =
-  "A move is a few poses shown one after another, like a flipbook. Each one plays once, then the mascot rests on its default pose. Pick a move to edit its poses; the Triggers table says when each one plays.";
+  'A move is a few poses shown one after another, like a flipbook. Each one plays once, then the mascot rests on its default pose. Pick a move to edit its poses; the Triggers table says when each one plays. To repeat a move, give it an "every few seconds" trigger.';
 
 /** Left column of Animate: every move with when it plays, and a way to start a new one. */
 export const MovesList = () => {
@@ -33,7 +33,7 @@ export const MovesList = () => {
         Moves
         <InfoTip label="About moves" text={MOVES_HELP} />
       </SectionLabel>
-      <SidebarList className="gap-2">
+      <SidebarList className="gap-2" action={<NewMoveMenu />}>
         {Object.keys(doc.sequences).map(name => (
           <SelectableItem
             key={name}
@@ -49,10 +49,6 @@ export const MovesList = () => {
           </SelectableItem>
         ))}
       </SidebarList>
-      <NewMoveMenu />
-      <p className="mt-1.5 mb-0 text-xs leading-relaxed text-muted">
-        To repeat a move, give it an &quot;every few seconds&quot; trigger.
-      </p>
     </EditorSidebar>
   );
 };

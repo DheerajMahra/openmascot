@@ -6,13 +6,14 @@ import type { LayoutStorage } from "react-resizable-panels";
 import { useDefaultLayout } from "react-resizable-panels";
 
 import { NextStepLink } from "@/components/editor/next-step-link";
+import { Stepper } from "@/components/layout/stepper";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
 /**
  * The columns every editor step shares: a sidebar, the main workspace, and the live preview.
- * Share has no sidebar. Both side columns share one size rule and can be dragged wider,
+ * Share has no sidebar. The stepper sits atop the workspace, so the side columns run up to the header. Both side columns share one size rule and can be dragged wider,
  * never narrower than SIDE_MIN. Each column is a landmark, so pass an aria-label.
  */
 
@@ -70,10 +71,13 @@ export const EditorColumns = ({
         </>
       )}
       <ResizablePanel id="workspace" minSize={WORKSPACE_MIN} style={PANEL_STYLE}>
-        {/* Wide tables (triggers) can overflow sideways when the side columns are dragged wide. */}
-        <ScrollArea className="h-full" scrollbars="both">
-          {workspace}
-        </ScrollArea>
+        <div className="flex h-full flex-col">
+          <Stepper />
+          {/* Wide tables (triggers) can overflow sideways when the side columns are dragged wide. */}
+          <ScrollArea className="min-h-0 flex-1" scrollbars="both">
+            {workspace}
+          </ScrollArea>
+        </div>
       </ResizablePanel>
       <ResizableHandle withHandle />
       <ResizablePanel
@@ -102,19 +106,29 @@ export const EditorSidebar = ({ className, ...rest }: PanelProps) => (
 /**
  * The list in a sidebar (poses, moves): as tall as its items until the sidebar runs out of room,
  * then it scrolls. Room for the scrollbar is only made while there is something to scroll.
+ * `action` (a "New …" button) stays above the list, as wide as its items.
  */
 export const SidebarList = ({
   className,
+  action,
   children
 }: {
   className?: string;
+  action?: ReactNode;
   children: ReactNode;
 }) => (
-  <ScrollArea className="group/list flex min-h-0 flex-col" viewportClassName="h-auto">
-    <div className={cn("flex flex-col pr-0.5 group-data-[has-overflow-y]/list:pr-3.5", className)}>
-      {children}
-    </div>
-  </ScrollArea>
+  <div className="group/side flex min-h-0 flex-col gap-2.5">
+    {action && (
+      <div className="flex flex-col pr-0.5 group-has-data-has-overflow-y/side:pr-3.5">{action}</div>
+    )}
+    <ScrollArea className="group/list flex min-h-0 flex-col" viewportClassName="h-auto">
+      <div
+        className={cn("flex flex-col pr-0.5 group-data-[has-overflow-y]/list:pr-3.5", className)}
+      >
+        {children}
+      </div>
+    </ScrollArea>
+  </div>
 );
 
 export const EditorWorkspace = ({ className, ...rest }: PanelProps) => (

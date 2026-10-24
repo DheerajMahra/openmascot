@@ -470,6 +470,29 @@ describe("undo: poses", () => {
   });
 });
 
+describe("new pose", () => {
+  it("copies the pose it starts from and is named after it", () => {
+    const store = setup();
+    store.dispatch({ type: "add-pose", name: "wave" });
+    stroke(store, [[0, 0]], { pose: "wave" });
+
+    store.dispatch({ type: "add-pose", from: "wave" });
+    expect(store.getState().poseName).toBe("wave 1");
+    expect(pose(store, "wave 1")).toBe(pose(store, "wave"));
+
+    store.dispatch({ type: "add-pose", from: "wave 1" });
+    expect(store.getState().poseName).toBe("wave 2");
+  });
+
+  it("starts from default when no pose is given", () => {
+    const store = setup();
+    stroke(store, [[0, 0]]);
+    store.dispatch({ type: "add-pose" });
+    expect(store.getState().poseName).toBe("default 1");
+    expect(pose(store, "default 1")).toBe(pose(store));
+  });
+});
+
 describe("undo: starting over", () => {
   it("clears undo and redo when another mascot replaces this one", () => {
     const store = withBothStacks();

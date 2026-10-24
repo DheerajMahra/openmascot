@@ -26,7 +26,7 @@ export const TriggersTable = () => {
   const rows = Object.entries(triggers);
 
   return (
-    <div className="flex flex-col gap-2.5 border-t border-line pt-4">
+    <div className="flex flex-col gap-2.5 pt-4">
       <SectionLabel>Triggers</SectionLabel>
       <GridTable columns={TRIGGER_COLUMNS} aria-label="Triggers">
         <GridTableHeader>

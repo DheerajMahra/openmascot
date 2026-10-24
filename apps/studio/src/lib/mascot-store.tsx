@@ -224,11 +224,12 @@ export const toPoseName = (name: string): string =>
     .slice(0, 32)
     .replace(/^[\s_-]+|[\s_-]+$/g, "");
 
-/** "default 1", or the next number up if that is taken. */
-export const nextPoseName = (poses: Record<string, string>): string => {
+/** "wave 1" for a pose made from "wave" (or from "wave 3"), or the next number up if that is taken. */
+export const nextPoseName = (poses: Record<string, string>, from = "default"): string => {
+  const base = from.replace(/ \d+$/, "").slice(0, 27) || "default";
   let n = 1;
-  while (`default ${n}` in poses) n++;
-  return `default ${n}`;
+  while (`${base} ${n}` in poses) n++;
+  return `${base} ${n}`;
 };
 
 /** Every trigger key that plays this sequence, in table order. */
@@ -322,9 +323,10 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "clear-pose":
       return withPixels(s, a.name, blankPose(w, h));
     case "add-pose": {
-      const name = a.name === undefined ? nextPoseName(doc.poses) : toPoseName(a.name);
+      const from = a.from ?? "default";
+      const name = a.name === undefined ? nextPoseName(doc.poses, from) : toPoseName(a.name);
       if (!name || name in doc.poses) return s;
-      const value = normalizePose(doc.poses[a.from ?? "default"] ?? "", w, h);
+      const value = normalizePose(doc.poses[from] ?? "", w, h);
       return { ...s, doc: { ...doc, poses: { ...doc.poses, [name]: value } }, poseName: name };
     }
     case "rename-pose": {

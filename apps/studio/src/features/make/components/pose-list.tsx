@@ -1,18 +1,16 @@
 "use client";
 
-import { PlusIcon } from "lucide-react";
-
 import { SelectableItem, scrollIntoView } from "@/components/editor/selectable-item";
 import { SidebarList } from "@/components/layout/editor-shell";
 import { MascotStage } from "@/components/mascot/mascot-stage";
 import { MascotThumb } from "@/components/mascot/mascot-thumb";
-import { Button } from "@/components/ui/button";
 import { InfoTip } from "@/components/ui/info-tip";
 import { SectionLabel } from "@/components/ui/section-label";
+import { NewPoseMenu } from "@/features/make/components/new-pose-menu";
 import { useEditorSelection, useMascotDispatch, useMascotDoc } from "@/lib/mascot-store";
 
 const POSES_HELP =
-  "A pose is one drawing of your mascot. Moves switch between poses. A new pose starts as a copy of default, so change only what differs: eyes, arms, mouth.";
+  "A pose is one drawing of your mascot. Moves switch between poses. Start a new pose from default or from the pose you have open, then change only what differs: eyes, arms, mouth.";
 
 /** Every pose with a thumbnail; pick one to draw on it. */
 export const PoseList = () => {
@@ -26,7 +24,7 @@ export const PoseList = () => {
         Poses
         <InfoTip label="About poses" text={POSES_HELP} />
       </SectionLabel>
-      <SidebarList className="gap-1.5">
+      <SidebarList className="gap-1.5" action={<NewPoseMenu />}>
         {Object.keys(doc.poses).map(name => (
           <SelectableItem
             key={name}
@@ -42,13 +40,6 @@ export const PoseList = () => {
           </SelectableItem>
         ))}
       </SidebarList>
-      <Button
-        variant="dashed"
-        className="flex items-center gap-1.5 text-left font-mono"
-        onClick={() => dispatch({ type: "add-pose", from: "default" })}
-      >
-        <PlusIcon size={14} /> New pose
-      </Button>
     </>
   );
 };

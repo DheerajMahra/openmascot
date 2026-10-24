@@ -41,7 +41,7 @@ export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
   };
 
   return (
-    <GridTableRow>
+    <GridTableRow className="transition-colors hover:bg-paper-2">
       <span className="font-mono text-xs text-muted">{n}</span>
       <Select<TriggerKind>
         items={TRIGGER_KINDS.map(k => ({ value: k.id, label: k.label }))}

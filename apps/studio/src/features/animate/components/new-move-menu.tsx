@@ -13,7 +13,7 @@ import {
 import { useEditorSelection, useMascotDispatch } from "@/lib/mascot-store";
 import { MOVE_PRESETS } from "@/lib/presets";
 
-/** "+ New move…" menu: a preset, a copy of the current move, or an empty one. */
+/** "+ New move…" menu: an empty move, a copy of the current one, or a preset. */
 export const NewMoveMenu = () => {
   const dispatch = useMascotDispatch();
   const { seqName } = useEditorSelection();
@@ -31,25 +31,25 @@ export const NewMoveMenu = () => {
         render={
           <Button
             variant="dashed"
-            className="mt-1 flex w-full items-center gap-1.5 text-left font-normal"
+            className="flex w-full items-center gap-1.5 text-left font-normal"
           />
         }
       >
         <PlusIcon size={14} /> New move…
       </DropdownMenuTrigger>
       <DropdownMenuContent>
-        {MOVE_PRESETS.filter(p => p.id !== "empty").map(p => (
-          <DropdownMenuItem key={p.id} onClick={() => addPreset(p.id)}>
-            {p.label}
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => addPreset("empty")}>Start empty</DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => dispatch({ type: "add-seq", name: `${seqName}-copy`, from: seqName })}
         >
           Duplicate {seqName}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => addPreset("empty")}>Start empty</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        {MOVE_PRESETS.filter(p => p.id !== "empty").map(p => (
+          <DropdownMenuItem key={p.id} onClick={() => addPreset(p.id)}>
+            {p.label}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
