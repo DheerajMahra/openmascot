@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
+  experimental: {
+    agentUpgrade: "security"
+  },
   // The editor steps only exist for a mascot id; without one, go pick a mascot.
   redirects: async () =>
     ["/make", "/animate", "/share"].map(source => ({ source, destination: "/", permanent: false })),
