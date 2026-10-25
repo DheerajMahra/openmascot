@@ -2,11 +2,11 @@
 
 import type { MascotPlayer } from "@openmascot/embed";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { LivePreviewPanel } from "@/components/editor/live-preview-panel";
 import { EditorColumns, EditorWorkspace } from "@/components/layout/editor-shell";
 import { MoveHeader } from "@/features/animate/components/move-header";
-import { MovePreview } from "@/features/animate/components/move-preview";
 import { MovesList } from "@/features/animate/components/moves-list";
 import { StepTable } from "@/features/animate/components/step-table";
 import { TriggersTable } from "@/features/animate/components/triggers-table";
@@ -30,10 +30,10 @@ export const AnimateScreen = () => {
     playerRef.current?.showFrame(seqName, startTick(frames, index));
   };
 
-  const play = () => {
-    setPicked(null);
+  // Play the chosen move once; the preview's player is mounted by the time this runs.
+  useEffect(() => {
     playerRef.current?.play(seqName);
-  };
+  }, [seqName]);
 
   return (
     <EditorColumns
@@ -45,7 +45,14 @@ export const AnimateScreen = () => {
           <TriggersTable />
         </EditorWorkspace>
       }
-      preview={<MovePreview playerRef={playerRef} onPlay={play} />}
+      preview={
+        <LivePreviewPanel
+          mode="try"
+          playerRef={playerRef}
+          activeMove={seqName}
+          onPlay={() => setPicked(null)}
+        />
+      }
     />
   );
 };

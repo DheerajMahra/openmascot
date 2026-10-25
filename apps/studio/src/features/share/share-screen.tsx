@@ -1,14 +1,15 @@
 "use client";
 
-import { TryMovesPreview } from "@/components/editor/try-moves-preview";
+import { LivePreview } from "@/components/editor/live-preview";
 import { EditorColumns } from "@/components/layout/editor-shell";
+import { Separator } from "@/components/ui/separator";
 import { DownloadOptions } from "@/features/share/components/download-options";
 import { EmbedSnippet } from "@/features/share/components/embed-snippet";
 import { MascotSummary } from "@/features/share/components/mascot-summary";
 import { fileBase } from "@/features/share/lib/download";
 import { useMascotDoc } from "@/lib/mascot-store";
 
-/** Step 3: summary, downloads, and the embed snippet, with the live preview alongside. */
+/** Step 3: one centred page with the summary, downloads, the embed snippet, and the mascot running live. */
 export const ShareScreen = () => {
   const doc = useMascotDoc();
   const base = fileBase(doc.name);
@@ -23,13 +24,11 @@ export const ShareScreen = () => {
           <MascotSummary doc={doc} />
           <DownloadOptions base={base} />
           <EmbedSnippet base={base} />
+          <Separator className="my-4" />
+          <section aria-label="Live preview">
+            <LivePreview mode="live" />
+          </section>
         </section>
-      }
-      preview={
-        <TryMovesPreview
-          hint="This is exactly what your site will show. Try each move before you download."
-          emptyHint="No moves yet. Add some on Animate."
-        />
       }
     />
   );

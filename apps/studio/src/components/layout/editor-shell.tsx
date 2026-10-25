@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * The columns every editor step shares: a sidebar, the main workspace, and the live preview.
- * Share has no sidebar. The stepper sits atop the workspace, so the side columns run up to the header. Both side columns share one size rule and can be dragged wider,
+ * Share has neither side column, so its workspace takes the full width. The stepper sits atop the workspace, so the side columns run up to the header. Both side columns share one size rule and can be dragged wider,
  * never narrower than SIDE_MIN. Each column is a landmark, so pass an aria-label.
  */
 
@@ -41,13 +41,23 @@ export const EditorColumns = ({
 }: {
   sidebar?: ReactNode;
   workspace: ReactNode;
-  preview: ReactNode;
+  preview?: ReactNode;
 }) => {
   // A layout without the sidebar has different panels, so it remembers its widths separately.
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
     id: sidebar ? "editor-columns" : "editor-columns-no-sidebar",
     storage: layoutStorage
   });
+
+  // One column has nothing to resize.
+  if (!sidebar && !preview) {
+    return (
+      <div className="flex h-full min-w-0 flex-1 flex-col">
+        <Stepper />
+        <ScrollArea className="min-h-0 flex-1">{workspace}</ScrollArea>
+      </div>
+    );
+  }
 
   return (
     <ResizablePanelGroup
@@ -79,16 +89,20 @@ export const EditorColumns = ({
           </ScrollArea>
         </div>
       </ResizablePanel>
-      <ResizableHandle withHandle />
-      <ResizablePanel
-        id="preview"
-        defaultSize={SIDE_DEFAULT}
-        minSize={SIDE_MIN}
-        maxSize={SIDE_MAX}
-        style={PANEL_STYLE}
-      >
-        <ScrollArea className="h-full">{preview}</ScrollArea>
-      </ResizablePanel>
+      {preview && (
+        <>
+          <ResizableHandle withHandle />
+          <ResizablePanel
+            id="preview"
+            defaultSize={SIDE_DEFAULT}
+            minSize={SIDE_MIN}
+            maxSize={SIDE_MAX}
+            style={PANEL_STYLE}
+          >
+            <ScrollArea className="h-full">{preview}</ScrollArea>
+          </ResizablePanel>
+        </>
+      )}
     </ResizablePanelGroup>
   );
 };

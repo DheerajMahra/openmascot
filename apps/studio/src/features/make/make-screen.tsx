@@ -1,7 +1,7 @@
 "use client";
 
+import { LivePreviewPanel } from "@/components/editor/live-preview-panel";
 import { EditorColumns, EditorWorkspace } from "@/components/layout/editor-shell";
-import { MakePreview } from "@/features/make/components/make-preview";
 import { MakeSidebar } from "@/features/make/components/make-sidebar";
 import { Pixelboard } from "@/features/make/components/pixelboard";
 import { PoseHeader } from "@/features/make/components/pose-header";
@@ -30,7 +30,7 @@ export const MakeScreen = () => {
           </div>
         </EditorWorkspace>
       }
-      preview={<MakePreview />}
+      preview={<LivePreviewPanel mode="try" />}
     />
   );
 };
