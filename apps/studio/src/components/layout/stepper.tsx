@@ -4,6 +4,7 @@ import { CheckIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { useStepHref } from "@/hooks/use-step-href";
 import { STEPS, stepIndex } from "@/lib/steps";
 import { cn } from "@/lib/utils";
 
@@ -28,6 +29,7 @@ const StepBadge = ({ state, number }: { state: StepState; number: number }) => (
  */
 export const Stepper = () => {
   const current = stepIndex(usePathname());
+  const hrefFor = useStepHref();
   return (
     <nav
       aria-label="Steps"
@@ -45,7 +47,7 @@ export const Stepper = () => {
                 />
               )}
               <Link
-                href={step.href}
+                href={hrefFor(step)}
                 aria-current={state === "current" ? "step" : undefined}
                 className={cn(
                   "flex items-center gap-2.5 no-underline",

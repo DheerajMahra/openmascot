@@ -1,8 +1,8 @@
 import { AppHeader } from "@/components/layout/app-header";
-import { ContinueBanner } from "@/features/start/components/continue-banner";
 import { StartingPoints } from "@/features/start/components/starting-points";
+import { YourMascots } from "@/features/start/components/your-mascots";
 
-/** Landing screen: resume the saved mascot or pick a starting point. */
+/** Landing screen: open a saved mascot or pick a starting point. */
 export const StartScreen = () => (
   <>
     <AppHeader>
@@ -17,7 +17,7 @@ export const StartScreen = () => (
           this browser.
         </p>
       </div>
-      <ContinueBanner />
+      <YourMascots />
       <StartingPoints />
     </main>
   </>

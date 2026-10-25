@@ -12,3 +12,7 @@ export const stepIndex = (pathname: string): number =>
     0,
     STEPS.findIndex(s => pathname.startsWith(s.href))
   );
+
+/** A step's URL for the open mascot. A draft keeps its starting point, so a reload rebuilds the same draft. */
+export const stepHref = (step: Step, id: string, from: string | null): string =>
+  `${step.href}/${id}${from ? `?from=${from}` : ""}`;

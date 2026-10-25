@@ -1,8 +1,17 @@
+import type { MascotRepository } from "@/lib/mascot-repository";
 import type { MascotAction, MascotStore } from "@/lib/mascot-store";
+import type { MascotDoc } from "@openmascot/embed";
 
 import { describe, expect, it } from "vitest";
 
-import { canRedo, canUndo, createBlankMascot, createMascotStore } from "@/lib/mascot-store";
+import {
+  canRedo,
+  canUndo,
+  createAutosave,
+  createBlankMascot,
+  createMascotStore,
+  showsMascot
+} from "@/lib/mascot-store";
 import { cellAt, colorChar } from "@/lib/pose-utils";
 
 const W = 24;
@@ -15,7 +24,7 @@ const PALETTE = ["#141413", "#d97757", "#be684d", "#699acb"];
 /** A store holding a fresh blank mascot: one blank "default" pose, four colors, one move: "bounce". */
 const setup = (): MascotStore => {
   const store = createMascotStore();
-  store.dispatch({ type: "replace-doc", doc: { ...createBlankMascot(), palette: PALETTE } });
+  store.dispatch({ type: "open-saved", doc: { ...createBlankMascot(), palette: PALETTE } });
   return store;
 };
 
@@ -494,15 +503,15 @@ describe("new pose", () => {
 });
 
 describe("undo: starting over", () => {
-  it("clears undo and redo when another mascot replaces this one", () => {
+  it("clears undo and redo when a saved mascot opens", () => {
     const store = withBothStacks();
-    store.dispatch({ type: "replace-doc", doc: createBlankMascot() });
+    store.dispatch({ type: "open-saved", doc: createBlankMascot() });
     expect(steps(store)).toEqual({ undo: false, redo: false });
   });
 
-  it("clears undo and redo when the saved mascot loads", () => {
+  it("clears undo and redo when a draft opens", () => {
     const store = withBothStacks();
-    store.dispatch({ type: "hydrate", doc: createBlankMascot() });
+    store.dispatch({ type: "open-draft", doc: createBlankMascot(), from: "blank" });
     expect(steps(store)).toEqual({ undo: false, redo: false });
   });
 
@@ -521,13 +530,13 @@ describe("blank mascot", () => {
 
   it("paints with that color as soon as it opens", () => {
     const store = createMascotStore();
-    store.dispatch({ type: "replace-doc", doc: createBlankMascot() });
+    store.dispatch({ type: "open-saved", doc: createBlankMascot() });
     expect(store.getState().colorIndex).toBe(0);
   });
 
   it("starts with the Bounce move selected, so a fresh drawing has something to play", () => {
     const store = createMascotStore();
-    store.dispatch({ type: "replace-doc", doc: createBlankMascot() });
+    store.dispatch({ type: "open-saved", doc: createBlankMascot() });
     const { doc, seqName } = store.getState();
     expect(Object.keys(doc.sequences)).toEqual(["bounce"]);
     expect(seqName).toBe("bounce");
@@ -539,7 +548,7 @@ describe("mascot name", () => {
   it("is Untitled when a mascot loads with a blank or spaces-only name", () => {
     for (const name of ["", "   "]) {
       const store = createMascotStore();
-      store.dispatch({ type: "hydrate", doc: { ...createBlankMascot(), name } });
+      store.dispatch({ type: "open-saved", doc: { ...createBlankMascot(), name } });
       expect(store.getState().doc.name).toBe("Untitled");
     }
   });
@@ -548,5 +557,227 @@ describe("mascot name", () => {
     const store = setup();
     store.dispatch({ type: "set-name", name: "" });
     expect(store.getState().doc.name).toBe("");
+  });
+});
+
+describe("opening a mascot", () => {
+  it("starts out loading, with nothing opened", () => {
+    expect(createMascotStore().getState().status).toBe("loading");
+  });
+
+  it("opens a draft with where it came from", () => {
+    const store = createMascotStore();
+    const doc = createBlankMascot();
+    store.dispatch({ type: "open-draft", doc, from: "blank" });
+    const s = store.getState();
+    expect(s.status).toBe("draft");
+    expect(s.from).toBe("blank");
+    expect(s.doc.id).toBe(doc.id);
+  });
+
+  it("opens a saved mascot with no starting point", () => {
+    const store = createMascotStore();
+    store.dispatch({ type: "open-draft", doc: createBlankMascot(), from: "blank" });
+    store.dispatch({ type: "open-saved", doc: createBlankMascot() });
+    expect(store.getState().status).toBe("saved");
+    expect(store.getState().from).toBeNull();
+  });
+
+  it("selects the default pose and first move of the opened mascot", () => {
+    const store = setup();
+    store.dispatch({ type: "add-pose", name: "wave" });
+    store.dispatch({ type: "open-saved", doc: createBlankMascot() });
+    expect(store.getState().poseName).toBe("default");
+    expect(store.getState().seqName).toBe("bounce");
+  });
+
+  it("marks an id that isn't saved as missing", () => {
+    const store = createMascotStore();
+    store.dispatch({ type: "open-missing", id: "m_gone" });
+    expect(store.getState().status).toBe("missing");
+    expect(store.getState().missingId).toBe("m_gone");
+  });
+
+  it("turns a draft into a saved mascot, keeping its doc and history", () => {
+    const store = createMascotStore();
+    store.dispatch({
+      type: "open-draft",
+      doc: { ...createBlankMascot(), palette: PALETTE },
+      from: "blank"
+    });
+    stroke(store, [[0, 0]]);
+    const { doc } = store.getState();
+    store.dispatch({ type: "mark-saved" });
+    const s = store.getState();
+    expect(s.status).toBe("saved");
+    expect(s.from).toBeNull();
+    expect(s.doc).toBe(doc);
+    expect(canUndo(s)).toBe(true);
+  });
+
+  it("only marks a draft as saved", () => {
+    const store = createMascotStore();
+    store.dispatch({ type: "open-missing", id: "m_gone" });
+    store.dispatch({ type: "mark-saved" });
+    expect(store.getState().status).toBe("missing");
+  });
+});
+
+describe("closing a mascot", () => {
+  it("goes back to loading when the open mascot is closed", () => {
+    const store = setup();
+    store.dispatch({ type: "close", id: store.getState().doc.id });
+    expect(store.getState().status).toBe("loading");
+  });
+
+  it("ignores closing a mascot that isn't open", () => {
+    const store = setup();
+    store.dispatch({ type: "close", id: "m_other" });
+    expect(store.getState().status).toBe("saved");
+  });
+});
+
+/** A repository that records what autosave writes. */
+const recordingRepo = (): MascotRepository & { saved: MascotDoc[] } => {
+  const saved: MascotDoc[] = [];
+  return {
+    saved,
+    list: async () => [],
+    get: async () => null,
+    save: async doc => {
+      saved.push(doc);
+    },
+    remove: async () => {}
+  };
+};
+
+/** A store holding a fresh, unsaved blank draft with fixed colors. */
+const draftStore = (): MascotStore => {
+  const store = createMascotStore();
+  store.dispatch({
+    type: "open-draft",
+    doc: { ...createBlankMascot(), palette: PALETTE },
+    from: "blank"
+  });
+  return store;
+};
+
+describe("autosave", () => {
+  it("doesn't save a mascot just because it opened", () => {
+    const store = createMascotStore();
+    const repo = recordingRepo();
+    createAutosave(store, repo, () => {});
+    store.dispatch({ type: "open-draft", doc: createBlankMascot(), from: "blank" });
+    store.dispatch({ type: "open-saved", doc: createBlankMascot() });
+    expect(repo.saved).toEqual([]);
+  });
+
+  it("doesn't save a draft that only changed selection, tool or board options", () => {
+    const store = draftStore();
+    const repo = recordingRepo();
+    createAutosave(store, repo, () => {});
+    store.dispatch({ type: "set-tool", tool: "fill" });
+    store.dispatch({ type: "set-color", index: 2 });
+    store.dispatch({ type: "select-seq", name: "bounce" });
+    store.dispatch({ type: "set-board-option", option: "centerLines", value: false });
+    expect(repo.saved).toEqual([]);
+    expect(store.getState().status).toBe("draft");
+  });
+
+  it("saves a draft on its first change and promotes it once", () => {
+    const store = draftStore();
+    const repo = recordingRepo();
+    const promoted: string[] = [];
+    createAutosave(store, repo, id => promoted.push(id));
+    stroke(store, [[0, 0]]);
+    expect(store.getState().status).toBe("saved");
+    expect(repo.saved).toEqual([store.getState().doc]);
+    expect(promoted).toEqual([store.getState().doc.id]);
+
+    stroke(store, [[1, 0]]);
+    expect(repo.saved).toHaveLength(2);
+    expect(promoted).toHaveLength(1);
+  });
+
+  it("doesn't save a draft for gestures that leave it as it was", () => {
+    const store = draftStore();
+    const repo = recordingRepo();
+    createAutosave(store, repo, () => {});
+    // Erasing an empty cell, and a color pick that ends on the color it started with.
+    stroke(store, [[0, 0]], { ch: EMPTY });
+    pickColor(store, 1, ["#d97757"]);
+    store.dispatch({ type: "set-name", name: store.getState().doc.name });
+    expect(repo.saved).toEqual([]);
+    expect(store.getState().status).toBe("draft");
+  });
+
+  it("doesn't re-save a saved mascot for a gesture that changes nothing", () => {
+    const store = setup();
+    const repo = recordingRepo();
+    createAutosave(store, repo, () => {});
+    stroke(store, [[0, 0]]);
+    stroke(store, [[0, 0]]);
+    expect(repo.saved).toHaveLength(1);
+  });
+
+  it("counts a rename as a change", () => {
+    const store = draftStore();
+    const repo = recordingRepo();
+    createAutosave(store, repo, () => {});
+    store.dispatch({ type: "set-name", name: "Pip" });
+    expect(repo.saved.map(d => d.name)).toEqual(["Pip"]);
+  });
+
+  it("saves every change to a saved mascot, including undoing back to how it opened", () => {
+    const store = setup();
+    const repo = recordingRepo();
+    createAutosave(store, repo, () => {});
+    stroke(store, [[0, 0]]);
+    undo(store);
+    expect(repo.saved).toHaveLength(2);
+    expect(repo.saved[1]).toBe(store.getState().doc);
+  });
+
+  it("stops saving a mascot once it is closed", () => {
+    const store = setup();
+    const repo = recordingRepo();
+    createAutosave(store, repo, () => {});
+    store.dispatch({ type: "close", id: store.getState().doc.id });
+    store.dispatch({ type: "set-name", name: "Ghost" });
+    expect(repo.saved).toEqual([]);
+  });
+
+  it("stops when unsubscribed", () => {
+    const store = setup();
+    const repo = recordingRepo();
+    const stop = createAutosave(store, repo, () => {});
+    stop();
+    stroke(store, [[0, 0]]);
+    expect(repo.saved).toEqual([]);
+  });
+});
+
+describe("which mascot the editor shows", () => {
+  it("shows a draft or saved mascot only under its own id", () => {
+    const store = draftStore();
+    const { id } = store.getState().doc;
+    expect(showsMascot(store.getState(), id)).toBe(true);
+    expect(showsMascot(store.getState(), "m_other")).toBe(false);
+
+    store.dispatch({ type: "mark-saved" });
+    expect(showsMascot(store.getState(), id)).toBe(true);
+  });
+
+  it("shows nothing while loading, missing or closed", () => {
+    const store = createMascotStore();
+    const { id } = store.getState().doc;
+    expect(showsMascot(store.getState(), id)).toBe(false);
+
+    store.dispatch({ type: "open-missing", id });
+    expect(showsMascot(store.getState(), id)).toBe(false);
+
+    const saved = setup();
+    saved.dispatch({ type: "close", id: saved.getState().doc.id });
+    expect(showsMascot(saved.getState(), saved.getState().doc.id)).toBe(false);
   });
 });

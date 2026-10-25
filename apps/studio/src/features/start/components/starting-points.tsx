@@ -1,12 +1,14 @@
 "use client";
 
+import type { StartFrom } from "@/lib/samples";
+
 import { useRouter } from "next/navigation";
 
 import { MascotPreview } from "@/components/mascot/mascot-preview";
 import { SectionLabel } from "@/components/ui/section-label";
 import { StartTile, StartTileBody, StartTileMedia } from "@/features/start/components/start-tile";
-import { createBlankMascot, useMascotDispatch } from "@/lib/mascot-store";
-import { SAMPLES, cloneSample } from "@/lib/samples";
+import { newId } from "@/lib/pose-utils";
+import { SAMPLES } from "@/lib/samples";
 
 /** A light grid like the drawing board, so the blank tile reads as "empty canvas". */
 const BOARD_GRID = {
@@ -16,25 +18,20 @@ const BOARD_GRID = {
   backgroundSize: "14px 14px"
 };
 
-/** Blank canvas plus every sample. Picking one replaces the current mascot and opens Make. */
+/**
+ * Blank canvas plus every sample. Picking one opens Make on a new draft; the id is made on click so
+ * every pick is a separate mascot, and it is only saved once something changes.
+ */
 export const StartingPoints = () => {
-  const dispatch = useMascotDispatch();
   const router = useRouter();
 
-  const start = (doc: ReturnType<typeof createBlankMascot>) => {
-    dispatch({ type: "replace-doc", doc });
-    router.push("/make");
-  };
+  const start = (from: StartFrom) => router.push(`/make/${newId()}?from=${from}`);
 
   return (
     <section aria-labelledby="start-from" className="flex flex-col gap-3">
       <SectionLabel id="start-from">Start from</SectionLabel>
       <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 md:grid-cols-3">
-        <StartTile
-          dashed
-          aria-label="Start from a blank canvas"
-          onClick={() => start(createBlankMascot())}
-        >
+        <StartTile dashed aria-label="Start from a blank canvas" onClick={() => start("blank")}>
           <StartTileMedia className="items-center p-0" style={BOARD_GRID}>
             <span
               aria-hidden="true"
@@ -48,7 +45,7 @@ export const StartingPoints = () => {
         </StartTile>
 
         {SAMPLES.map(sample => (
-          <StartTile key={sample.doc.id} onClick={() => start(cloneSample(sample))}>
+          <StartTile key={sample.doc.id} onClick={() => start(sample.key)}>
             <StartTileMedia>
               <MascotPreview doc={sample.doc} scale={6} />
             </StartTileMedia>

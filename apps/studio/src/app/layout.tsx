@@ -17,8 +17,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"]
 });
 
+// The title is rendered in the layout below, not here: metadata streams in on every navigation, which
+// takes the old <title> down first, and the tab flashes the URL in between.
 export const metadata: Metadata = {
-  title: "OpenMascot Studio",
   description:
     "Open-source pixel mascot maker. Create a character, give it moods, embed it with two lines."
 };
@@ -27,6 +28,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
+        {/* React hoists this into <head>; the root layout never unmounts, so neither does the title. */}
+        <title>OpenMascot Studio</title>
         {/* A short delay so tooltips don't flash while the pointer is just passing over. */}
         <TooltipProvider delay={400}>
           <MascotProvider>{children}</MascotProvider>

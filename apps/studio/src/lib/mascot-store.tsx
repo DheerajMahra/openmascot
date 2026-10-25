@@ -1,18 +1,14 @@
 "use client";
 
+import type { MascotRepository } from "@/lib/mascot-repository";
 import type { TriggerKind } from "@/lib/presets";
+import type { StartFrom } from "@/lib/samples";
 import type { MascotDoc, MascotFrame } from "@openmascot/embed";
 import type { ReactNode } from "react";
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore
-} from "react";
+import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
+import { mascotRepository } from "@/lib/local-mascot-repository";
 import {
   blankPose,
   floodFill,
@@ -22,7 +18,6 @@ import {
   setCell
 } from "@/lib/pose-utils";
 import { MOVE_PRESETS, buildTrigger, uniqueTrigger } from "@/lib/presets";
-import { loadCurrent, saveCurrent } from "@/lib/storage";
 import clawdJson from "@/samples/clawd.json";
 
 export type Tool = "pencil" | "mirror" | "eraser" | "fill";
@@ -36,21 +31,35 @@ export type MascotEdit =
   | { kind: "pixels"; pose: string; before: string; after: string }
   | { kind: "color"; index: number; before: string; after: string };
 
+/**
+ * Where the open mascot stands. `loading`: nothing opened for this URL yet. `draft`: a fresh copy
+ * from a starting point, not stored until its first change. `saved`: in the library, every change
+ * saves. `missing`: the URL names an id that isn't saved.
+ */
+export type MascotStatus = "loading" | "draft" | "saved" | "missing";
+
 export interface MascotState {
   doc: MascotDoc;
+  status: MascotStatus;
+  /** The starting point a draft was made from; null once saved. */
+  from: StartFrom | null;
+  /** The id the URL asked for when status is `missing`. */
+  missingId: string | null;
   poseName: string;
   seqName: string;
   tool: Tool;
   colorIndex: number;
   history: MascotEdit[];
   future: MascotEdit[];
-  hydrated: boolean;
   board: BoardOptions;
 }
 
 export type MascotAction =
-  | { type: "hydrate"; doc: MascotDoc | null }
-  | { type: "replace-doc"; doc: MascotDoc }
+  | { type: "open-draft"; doc: MascotDoc; from: StartFrom }
+  | { type: "open-saved"; doc: MascotDoc }
+  | { type: "open-missing"; id: string }
+  | { type: "mark-saved" }
+  | { type: "close"; id: string }
   | { type: "set-name"; name: string }
   | { type: "select-pose"; name: string }
   | { type: "select-seq"; name: string }
@@ -116,15 +125,18 @@ export const createBlankMascot = (): MascotDoc => {
 
 const firstSeq = (doc: MascotDoc): string => Object.keys(doc.sequences)[0] ?? "";
 
+/** Clawd stands in until a mascot opens; nothing renders it while status is `loading`. */
 const initialState: MascotState = {
   doc: CLAWD,
+  status: "loading",
+  from: null,
+  missingId: null,
   poseName: "default",
   seqName: firstSeq(CLAWD),
   tool: "pencil",
   colorIndex: 1,
   history: [],
   future: [],
-  hydrated: false,
   board: { centerLines: true }
 };
 
@@ -251,34 +263,36 @@ const freeTriggerKey = (triggers: Record<string, string>): string => {
   return uniqueTrigger("custom", triggers);
 };
 
+/** A freshly opened mascot: its default pose and first move selected, no undo history. */
+const opened = (s: MascotState, doc: MascotDoc): MascotState => {
+  const next = migrateDoc(doc);
+  return {
+    ...s,
+    doc: next,
+    missingId: null,
+    poseName: "default" in next.poses ? "default" : (Object.keys(next.poses)[0] ?? "default"),
+    seqName: firstSeq(next),
+    colorIndex: Math.min(1, next.palette.length - 1),
+    history: [],
+    future: []
+  };
+};
+
 const reducer = (s: MascotState, a: MascotAction): MascotState => {
   const { doc } = s;
   const { w, h } = doc.grid;
   switch (a.type) {
-    case "hydrate": {
-      if (!a.doc) return { ...s, hydrated: true };
-      const next = migrateDoc(a.doc);
-      return {
-        ...s,
-        doc: next,
-        seqName: s.seqName in next.sequences ? s.seqName : firstSeq(next),
-        history: [],
-        future: [],
-        hydrated: true
-      };
-    }
-    case "replace-doc": {
-      const next = migrateDoc(a.doc);
-      return {
-        ...s,
-        doc: next,
-        poseName: "default" in next.poses ? "default" : (Object.keys(next.poses)[0] ?? "default"),
-        seqName: firstSeq(next),
-        colorIndex: Math.min(1, next.palette.length - 1),
-        history: [],
-        future: []
-      };
-    }
+    case "open-draft":
+      return { ...opened(s, a.doc), status: "draft", from: a.from };
+    case "open-saved":
+      return { ...opened(s, a.doc), status: "saved", from: null };
+    case "open-missing":
+      return { ...s, status: "missing", from: null, missingId: a.id, history: [], future: [] };
+    case "mark-saved":
+      return s.status === "draft" ? { ...s, status: "saved", from: null } : s;
+    case "close":
+      // Back to loading, so the closed mascot can't be edited (and saved) again.
+      return s.doc.id === a.id && s.status !== "loading" ? { ...s, status: "loading" } : s;
     case "set-name":
       return { ...s, doc: { ...doc, name: a.name } };
     case "select-pose":
@@ -519,6 +533,51 @@ export const createMascotStore = (initial: MascotState = initialState): MascotSt
   };
 };
 
+/** Whether the editor can show this mascot: it is open, as a draft or saved, under that id. */
+export const showsMascot = (s: MascotState, id: string): boolean =>
+  (s.status === "draft" || s.status === "saved") && s.doc.id === id;
+
+/** Whether prev and next hold the same open mascot, as opposed to one being opened, closed or saved. */
+const sameOpenMascot = (prev: MascotState, next: MascotState): boolean =>
+  next.doc.id === prev.doc.id &&
+  next.status === prev.status &&
+  (next.status === "draft" || next.status === "saved");
+
+/**
+ * Saves every change to the open mascot. A draft's first change stores it and makes it saved, then
+ * `onFirstSave` runs. Opening a mascot never saves it. A change is a doc whose content differs from
+ * what was last opened or saved: gestures that change nothing (erasing an empty cell, a color pick
+ * that ends where it began) still hand the store a new doc, and must not save a draft.
+ * Returns the unsubscribe.
+ */
+export const createAutosave = (
+  store: MascotStore,
+  repo: MascotRepository,
+  onFirstSave: (id: string) => void
+): (() => void) => {
+  let prev = store.getState();
+  let baseline = JSON.stringify(prev.doc);
+  return store.subscribe(() => {
+    const next = store.getState();
+    const same = sameOpenMascot(prev, next);
+    const docChanged = next.doc !== prev.doc;
+    prev = next;
+    if (!same) {
+      baseline = JSON.stringify(next.doc);
+      return;
+    }
+    if (!docChanged) return;
+    const content = JSON.stringify(next.doc);
+    if (content === baseline) return;
+    baseline = content;
+    void repo.save(next.doc);
+    if (next.status === "draft") {
+      store.dispatch({ type: "mark-saved" });
+      onFirstSave(next.doc.id);
+    }
+  });
+};
+
 /** Subscribes to one slice. The selector must return something stable: a primitive or a part of the state, never a fresh object. */
 const useStoreSelector = <T,>(store: MascotStore, selector: (s: MascotState) => T): T => {
   const getSnapshot = () => selector(store.getState());
@@ -530,24 +589,15 @@ const MascotStoreContext = createContext<MascotStore | null>(null);
 
 export const MascotProvider = ({ children }: { children: ReactNode }) => {
   const [store] = useState(createMascotStore);
-  const doc = useStoreSelector(store, s => s.doc);
-  const hydrated = useStoreSelector(store, s => s.hydrated);
 
-  // The doc storage already holds. Starts as the one loaded, so loading doesn't fake an "edited just now";
-  // compared to the last save (not the load) so undoing back to the loaded doc still saves.
-  const savedDoc = useRef<MascotDoc | null>(null);
-
-  useEffect(() => {
-    const stored = loadCurrent();
-    savedDoc.current = stored;
-    store.dispatch({ type: "hydrate", doc: stored });
-  }, [store]);
-
-  useEffect(() => {
-    if (!hydrated || doc === savedDoc.current) return;
-    saveCurrent(doc);
-    savedDoc.current = doc;
-  }, [doc, hydrated]);
+  // The URL already carries the id; dropping ?from= makes a reload open the saved mascot, not a fresh copy.
+  useEffect(
+    () =>
+      createAutosave(store, mascotRepository, () =>
+        window.history.replaceState(null, "", window.location.pathname)
+      ),
+    [store]
+  );
 
   return <MascotStoreContext.Provider value={store}>{children}</MascotStoreContext.Provider>;
 };
@@ -568,8 +618,7 @@ export const useMascotDispatch = (): MascotStore["dispatch"] => useMascotStore()
 /** The mascot being edited. */
 export const useMascotDoc = (): MascotDoc => useMascotSelector(s => s.doc);
 
-/** Whether the saved mascot has been loaded from this browser yet. */
-export const useMascotHydrated = (): boolean => useMascotSelector(s => s.hydrated);
+export const useMascotStatus = (): MascotStatus => useMascotSelector(s => s.status);
 
 /** The pose open on Make and the move open on Animate. */
 export const useEditorSelection = (): { poseName: string; seqName: string } => ({
