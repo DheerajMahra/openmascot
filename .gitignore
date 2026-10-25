@@ -22,8 +22,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files
+# env files (each app's .env.example is the committed template)
 .env*
+!.env.example
 
 # next.js
 .next/

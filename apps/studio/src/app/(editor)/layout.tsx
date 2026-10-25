@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import { MascotGate } from "@/components/editor/mascot-gate";
 import { AppHeader } from "@/components/layout/app-header";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+/** A crawler only ever sees an empty editor here: the mascot lives in the maker's browser. */
+export const metadata: Metadata = { robots: { index: false } };
 
 /**
  * Header above the three editor screens, filling the window; the screen below scrolls on its own.

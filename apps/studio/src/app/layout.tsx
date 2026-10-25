@@ -20,6 +20,8 @@ const geistMono = Geist_Mono({
 // The title is rendered in the layout below, not here: metadata streams in on every navigation, which
 // takes the old <title> down first, and the tab flashes the URL in between.
 export const metadata: Metadata = {
+  // The studio's own origin, so the start page's canonical URL comes out absolute.
+  metadataBase: new URL(process.env.NEXT_PUBLIC_STUDIO_URL || "http://localhost:3000"),
   description:
     "Open-source pixel mascot maker. Create a character, give it moods, embed it with two lines."
 };
