@@ -6,6 +6,7 @@ import type { StartFrom } from "@/lib/samples";
 import type { MascotDoc, MascotFrame } from "@openmascot/embed";
 import type { ReactNode } from "react";
 
+import { clawd } from "@openmascot/samples";
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
 import { mascotRepository } from "@/lib/local-mascot-repository";
@@ -18,7 +19,6 @@ import {
   setCell
 } from "@/lib/pose-utils";
 import { MOVE_PRESETS, buildTrigger, uniqueTrigger } from "@/lib/presets";
-import clawdJson from "@/samples/clawd.json";
 
 export type Tool = "pencil" | "mirror" | "eraser" | "fill";
 
@@ -99,7 +99,7 @@ export type MascotAction =
   | { type: "remove-trigger"; key: string }
   | { type: "set-board-option"; option: keyof BoardOptions; value: boolean };
 
-const CLAWD = clawdJson as unknown as MascotDoc;
+const CLAWD = clawd;
 const MAX_HISTORY = 50;
 /** Pose cells hold one base-36 character per palette index. */
 export const MAX_COLORS = 36;

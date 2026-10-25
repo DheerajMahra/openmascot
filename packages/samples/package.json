@@ -1,0 +1,21 @@
+{
+  "name": "@openmascot/samples",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The sample mascots Clawd and Moss, shared by the studio and the site.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./clawd.json": "./src/clawd.json",
+    "./moss.json": "./src/moss.json"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openmascot/embed": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}

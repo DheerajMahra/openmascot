@@ -1,9 +1,9 @@
 import type { MascotDoc } from "@openmascot/embed";
 
+import { clawd, moss } from "@openmascot/samples";
+
 import { createBlankMascot } from "@/lib/mascot-store";
 import { newId } from "@/lib/pose-utils";
-import clawd from "@/samples/clawd.json";
-import moss from "@/samples/moss.json";
 
 export interface Sample {
   /** Names the sample in a starting-point URL (`?from=clawd`). */
@@ -14,10 +14,10 @@ export interface Sample {
 
 /** Starter mascots. Each one shows a different palette, pose set and animation style. */
 export const SAMPLES: Sample[] = [
-  { key: "clawd", doc: clawd as unknown as MascotDoc, blurb: "The official Claude Code mascot." },
+  { key: "clawd", doc: clawd, blurb: "The official Claude Code mascot." },
   {
     key: "moss",
-    doc: moss as unknown as MascotDoc,
+    doc: moss,
     blurb: "Green slime. Squishes, hops, winks, melts."
   }
 ];
