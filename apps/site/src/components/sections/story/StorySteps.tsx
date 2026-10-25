@@ -15,7 +15,7 @@ const STEPS = [
     label: "Step 2 · Animate",
     title: "Give it moves, then say when they play.",
     body: "A move is a few poses shown one after another, like a flipbook: each row holds a pose for some frames, and can push it down or slide it sideways. Start from Bounce or Sway, start empty, or duplicate a move. Then pick what sets each one off: a hover, a click, page load, a timer, or an event from your own code.",
-    notes: ["sway · on hover", "idle · every 6 s", 'celebrate · on "success"'],
+    notes: ["sway · on hover", "idle · every 6 s", 'excited · on "success"'],
     order: "order-3",
     accent: { text: "text-moss-text", bar: "before:bg-moss" }
   },

@@ -25,6 +25,9 @@ export const SiteFooter = () => (
           GitHub
         </a>
       </nav>
+      <p className="w-full text-xs">
+        Clawd is a trademark of Anthropic, PBC. OpenMascot is not affiliated with Anthropic.
+      </p>
     </Container>
     <div
       aria-hidden

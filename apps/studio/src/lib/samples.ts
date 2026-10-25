@@ -10,11 +10,18 @@ export interface Sample {
   key: "clawd" | "moss";
   doc: MascotDoc;
   blurb: string;
+  /** Rights note shown behind an info icon on the sample's tile. */
+  notice?: string;
 }
 
 /** Starter mascots. Each one shows a different palette, pose set and animation style. */
 export const SAMPLES: Sample[] = [
-  { key: "clawd", doc: clawd, blurb: "The official Claude Code mascot." },
+  {
+    key: "clawd",
+    doc: clawd,
+    blurb: "The official Claude Code mascot.",
+    notice: "Clawd is a trademark of Anthropic, PBC. OpenMascot is not affiliated with Anthropic."
+  },
   {
     key: "moss",
     doc: moss,

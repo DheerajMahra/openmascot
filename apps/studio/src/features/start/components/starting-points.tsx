@@ -5,6 +5,7 @@ import type { StartFrom } from "@/lib/samples";
 import { useRouter } from "next/navigation";
 
 import { MascotPreview } from "@/components/mascot/mascot-preview";
+import { InfoTip } from "@/components/ui/info-tip";
 import { SectionLabel } from "@/components/ui/section-label";
 import { StartTile, StartTileBody, StartTileMedia } from "@/features/start/components/start-tile";
 import { newId } from "@/lib/pose-utils";
@@ -45,12 +46,21 @@ export const StartingPoints = () => {
         </StartTile>
 
         {SAMPLES.map(sample => (
-          <StartTile key={sample.doc.id} onClick={() => start(sample.key)}>
-            <StartTileMedia>
-              <MascotPreview doc={sample.doc} scale={6} />
-            </StartTileMedia>
-            <StartTileBody title={sample.doc.name} description={sample.blurb} />
-          </StartTile>
+          <div key={sample.doc.id} className="relative flex">
+            <StartTile className="flex-1" onClick={() => start(sample.key)}>
+              <StartTileMedia>
+                <MascotPreview doc={sample.doc} scale={6} />
+              </StartTileMedia>
+              <StartTileBody title={sample.doc.name} description={sample.blurb} />
+            </StartTile>
+            {/* A sibling, not a child: the tile is a button and can't hold another one. It sits on
+                the title row: 150px media + 12px padding + 2px to center on the 20px line. */}
+            {sample.notice && (
+              <span className="absolute top-[164px] right-3.5">
+                <InfoTip label={`About ${sample.doc.name}`} text={sample.notice} />
+              </span>
+            )}
+          </div>
         ))}
       </div>
     </section>

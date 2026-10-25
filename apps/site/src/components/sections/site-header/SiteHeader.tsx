@@ -1,7 +1,7 @@
 import { PoseImage } from "@/components/mascot/pose-image/PoseImage";
 import { Button } from "@/components/ui/button/Button";
 import { STUDIO_URL } from "@/lib/links";
-import { CLAWD } from "@/lib/mascots";
+import { MOSS } from "@/lib/mascots";
 
 const NAV = [
   { href: "#how", label: "How it works" },
@@ -18,7 +18,7 @@ export const SiteHeader = () => (
         href="#top"
         className="flex items-center gap-2.5 text-lg font-extrabold tracking-tight no-underline"
       >
-        <PoseImage doc={CLAWD} pose="default" scale={1.5} />
+        <PoseImage doc={MOSS} pose="default" scale={1.5} />
         OpenMascot
       </a>
       <nav aria-label="Sections" className="hidden gap-1 text-sm font-medium text-ink-soft lg:flex">
