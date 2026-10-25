@@ -34,20 +34,24 @@ export const MovesList = () => {
         <InfoTip label="About moves" text={MOVES_HELP} />
       </SectionLabel>
       <SidebarList className="gap-2" action={<NewMoveMenu />}>
-        {Object.keys(doc.sequences).map(name => (
-          <SelectableItem
-            key={name}
-            ref={name === seqName ? scrollIntoView : undefined}
-            selected={name === seqName}
-            onClick={() => dispatch({ type: "select-seq", name })}
-            className="justify-between gap-2 px-3 py-2.5"
-          >
-            <span className="truncate font-mono text-[13px]">{name}</span>
-            <span className="shrink-0 truncate text-[11px] text-muted">
-              {describeTriggers(triggersFor(doc, name))}
-            </span>
-          </SelectableItem>
-        ))}
+        {Object.keys(doc.sequences).map(name => {
+          const triggers = describeTriggers(triggersFor(doc, name));
+          return (
+            <SelectableItem
+              key={name}
+              ref={name === seqName ? scrollIntoView : undefined}
+              selected={name === seqName}
+              onClick={() => dispatch({ type: "select-seq", name })}
+              className="justify-between gap-2 px-3 py-2.5"
+            >
+              {/* The name keeps its width; the trigger line, shown only when there is one, takes what is left. */}
+              <span className="max-w-full shrink-0 truncate font-mono text-[13px]">{name}</span>
+              {triggers && (
+                <span className="min-w-0 truncate text-[11px] text-muted">{triggers}</span>
+              )}
+            </SelectableItem>
+          );
+        })}
       </SidebarList>
     </EditorSidebar>
   );

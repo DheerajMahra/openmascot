@@ -116,8 +116,5 @@ export const shortTrigger = (key: string): string => {
   }
 };
 
-/** One line on when a move plays, for the moves list. */
-export const describeTriggers = (keys: string[]): string => {
-  if (keys.length === 0) return "no trigger";
-  return keys.map(shortTrigger).join(", ");
-};
+/** One line on when a move plays, for the moves list. Empty when nothing triggers it. */
+export const describeTriggers = (keys: string[]): string => keys.map(shortTrigger).join(", ");
