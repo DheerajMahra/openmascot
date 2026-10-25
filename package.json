@@ -5,7 +5,9 @@
   "description": "Embeddable pixel mascot runtime: one script tag, one JSON file, a living mascot on any page.",
   "scripts": {
     "dev": "pnpm --filter @openmascot/studio dev",
+    "dev:site": "pnpm --filter @openmascot/site dev",
     "build": "pnpm --filter @openmascot/studio build",
+    "build:site": "pnpm --filter @openmascot/site build",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
     "format": "oxfmt",

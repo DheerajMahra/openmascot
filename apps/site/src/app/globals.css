@@ -1,0 +1,236 @@
+@import "tailwindcss";
+
+/* The site is light only, like the studio. */
+
+@theme inline {
+  /* Studio palette, copied from apps/studio/src/app/globals.css. */
+  --color-paper: #ffffff;
+  --color-paper-2: #faf8f5;
+  --color-ink: #1d1a17;
+  --color-muted: #6b645c;
+  --color-line: #d9d3cb;
+  --color-line-2: #efeae3;
+  --color-clay: #d97757;
+  --color-clay-deep: #be684d;
+  --color-clay-tint: #fdf3ee;
+  --color-stage: #141413;
+  --color-stage-text: #a39b90;
+  --color-ink-soft: #3d3833;
+  --color-code-fg: #f1ece4;
+  --color-board: #f6f2ec;
+  --color-board-grid: #e3dcd2;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  /* Landing only. */
+  --color-hairline: #e7e1d9;
+  --color-dot: #f0ece6;
+  --color-sky: #f3eee7;
+  --color-sky-line: #efe9e1;
+  --color-ink-hover: #2b2723;
+  /* The spec's clay and moss fail AA under small white text, so text and buttons use darker twins. */
+  --color-clay-button: #b05b3c;
+  --color-clay-button-hover: #9e4f33;
+  --color-clay-text: #a9563b;
+  --color-moss: #599036;
+  --color-leaf: #9bd16f;
+  --color-moss-tint: #eef7e6;
+  --color-moss-text: #4a7d2c;
+  --color-gold: #e0a83a;
+  --color-gold-tint: #fdf4e1;
+  --color-gold-text: #9a6a12;
+  --color-lilac: #8b7cf6;
+  --color-lilac-tint: #f1eef7;
+  --color-blue: #4a7d8f;
+  --color-blue-tint: #eaeeef;
+  --color-code-punct: #9a9186;
+  --font-pixel: var(--font-silkscreen);
+
+  /* Type: the headings scale with the viewport, the labels stay small and mono. */
+  --text-tag: 0.625rem;
+  --text-label: 0.6875rem;
+  --text-code: 0.78125rem;
+  --text-caption: 0.8125rem;
+  --text-button: 0.9375rem;
+  --text-lede: clamp(1.0625rem, 1.6vw, 1.25rem);
+  --text-sub: clamp(1rem, 1.7vw, 1.3125rem);
+  --text-step: clamp(1.75rem, 3.4vw, 2.5rem);
+  --text-display: clamp(1.875rem, 4.6vw, 3.25rem);
+  --text-hero: clamp(2.125rem, 4.8vw, 3.625rem);
+  --text-big: 4rem;
+  --text-watermark: clamp(2.75rem, 10.6vw, 10rem);
+  --leading-hero: 1.02;
+  --leading-display: 1.05;
+  --leading-watermark: 0.82;
+  --tracking-label: 0.06em;
+  --tracking-hero: -0.04em;
+  --tracking-display: -0.035em;
+
+  /* Breakpoints from the spec: 600 (small phone), 760, 860 (phone/desktop split), 1000. */
+  --breakpoint-sm: 37.5rem;
+  --breakpoint-md: 47.5rem;
+  --breakpoint-lg: 53.75rem;
+  --breakpoint-xl: 62.5rem;
+
+  /* Vertical rhythm that breathes with the viewport. */
+  --spacing-hero: clamp(2.5rem, 5vw, 4rem);
+  /* Every section gets the same padding above and below, so the gaps between them match. */
+  --spacing-section: clamp(3.5rem, 7vw, 6rem);
+  /* Scroll between story steps on desktop. */
+  --spacing-step-gap: 22vh;
+  --spacing-story-gap: clamp(1.5rem, 5vw, 4.5rem);
+  --spacing-parade: clamp(2.5rem, 7vw, 6.25rem);
+  --spacing-final-top: clamp(3.5rem, 8vw, 6.875rem);
+  --spacing-final-bottom: clamp(10rem, 20vw, 15rem);
+
+  --container-page: 73.75rem;
+  --container-lede: 56ch;
+  --container-sub: 46ch;
+  --container-step: 44ch;
+  --container-final: 16ch;
+
+  --radius-card: 1.25rem;
+  --radius-tile: 1.5rem;
+  --radius-stage: 1.75rem;
+  --radius-final: 2.25rem;
+
+  /* Two shadow families: soft lifts for paper, hard ink offsets for the sticker look. */
+  --shadow-hairline: 0 1px 2px rgb(29 26 23 / 0.04);
+  --shadow-float: 0 4px 14px rgb(29 26 23 / 0.08);
+  --shadow-lift: 0 20px 50px rgb(29 26 23 / 0.12);
+  --shadow-card-hover: 0 24px 50px rgb(29 26 23 / 0.1);
+  --shadow-stage: 0 30px 80px rgb(29 26 23 / 0.1);
+  --shadow-code: 0 20px 50px rgb(29 26 23 / 0.2);
+  --shadow-primary: 0 6px 18px rgb(176 91 60 / 0.28), inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  --shadow-primary-hover: 0 12px 30px rgb(176 91 60 / 0.42), inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  --shadow-live: inset 3px 0 0 var(--color-moss);
+  --shadow-kbd: inset 0 -1px 0 var(--color-line);
+  --shadow-ink-sm: -4px 4px 0 var(--color-ink);
+  --shadow-ink-md: -5px 5px 0 var(--color-ink);
+  --shadow-ink-lg: -6px 6px 0 var(--color-ink);
+
+  --ease-spring: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-pop: cubic-bezier(0.3, 1.6, 0.4, 1);
+
+  --animate-march: march 120s linear infinite;
+  --animate-blink: blink 1s steps(1) infinite;
+  --animate-row-in: row-in 0.3s ease;
+  --animate-heart: heart 1s ease-out forwards;
+
+  @keyframes march {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  @keyframes row-in {
+    from {
+      opacity: 0;
+      transform: translateX(-0.375rem);
+    }
+  }
+  @keyframes heart {
+    to {
+      transform: translate(var(--dx), -5.625rem) scale(0.6);
+      opacity: 0;
+    }
+  }
+}
+
+html {
+  color-scheme: light;
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.625rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  background-color: var(--color-paper);
+  background-image: radial-gradient(var(--color-dot) 1.3px, transparent 1.8px);
+  background-size: 1.5rem 1.5rem;
+  background-position: 0.75rem 0.75rem;
+  background-attachment: fixed;
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+
+canvas {
+  image-rendering: pixelated;
+}
+
+@utility pixelated {
+  image-rendering: pixelated;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-clay);
+  outline-offset: 3px;
+  border-radius: 0.375rem;
+}
+
+/* Backdrops. Patterns are hard to say in utility classes, so each gets a name here. */
+@utility bg-dots {
+  background-image: radial-gradient(var(--color-line) 1px, transparent 1.5px);
+  background-size: 1.375rem 1.375rem;
+}
+
+@utility bg-board-grid {
+  background-image:
+    linear-gradient(transparent calc(100% - 1px), var(--color-board-grid) 0),
+    linear-gradient(90deg, transparent calc(100% - 1px), var(--color-board-grid) 0);
+  background-size: 1.5rem 1.5rem;
+}
+
+/* The send-off card's grid: barely darker than its sky. */
+@utility sky-lines {
+  background-image:
+    linear-gradient(transparent calc(100% - 1px), var(--color-sky-line) 0),
+    linear-gradient(90deg, transparent calc(100% - 1px), var(--color-sky-line) 0);
+  background-size: 1.5rem 1.5rem;
+}
+
+@utility bg-board-grid-sm {
+  background-image:
+    linear-gradient(transparent calc(100% - 1px), var(--color-board-grid) 0),
+    linear-gradient(90deg, transparent calc(100% - 1px), var(--color-board-grid) 0);
+  background-size: 0.9375rem 0.9375rem;
+  background-position: center bottom;
+}
+
+@utility bg-hero {
+  background-image:
+    radial-gradient(var(--color-dot) 1.3px, transparent 1.8px),
+    linear-gradient(var(--color-paper-2) 0%, var(--color-paper-2) 55%, rgb(250 248 245 / 0) 100%);
+  background-size:
+    1.5rem 1.5rem,
+    100% 100%;
+  background-position:
+    0.75rem 0.75rem,
+    0 0;
+  background-attachment: fixed, scroll;
+}
+
+/* The page gutter grows with the viewport and clears the notch on phones in landscape. */
+@utility px-gutter {
+  padding-left: max(clamp(1rem, 4vw, 2.5rem), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(1rem, 4vw, 2.5rem), env(safe-area-inset-right, 0px));
+}
+
+@utility paused {
+  animation-play-state: paused;
+}
+
+@utility h-screen-nav {
+  min-height: calc(100dvh - 3.5rem - env(safe-area-inset-top, 0px));
+}
