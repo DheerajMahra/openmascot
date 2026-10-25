@@ -12,7 +12,7 @@ const EMPTY = ".";
 /** Fixed colors, so tests don't depend on the blank mascot's random one. */
 const PALETTE = ["#141413", "#d97757", "#be684d", "#699acb"];
 
-/** A store holding a fresh blank mascot: one blank "default" pose, four colors, one move. */
+/** A store holding a fresh blank mascot: one blank "default" pose, four colors, one move: "bounce". */
 const setup = (): MascotStore => {
   const store = createMascotStore();
   store.dispatch({ type: "replace-doc", doc: { ...createBlankMascot(), palette: PALETTE } });
@@ -306,7 +306,7 @@ describe("undo: deliberate actions are not undoable", () => {
     { name: "add a move", action: { type: "add-seq", name: "wave" }, changesDoc: true },
     {
       name: "rename a move",
-      action: { type: "rename-seq", from: "move", to: "hop" },
+      action: { type: "rename-seq", from: "bounce", to: "hop" },
       changesDoc: true
     },
     {
@@ -317,38 +317,38 @@ describe("undo: deliberate actions are not undoable", () => {
     },
     {
       name: "change a frame",
-      action: { type: "set-frame", seq: "move", index: 0, frame: { hold: 9 } },
+      action: { type: "set-frame", seq: "bounce", index: 0, frame: { hold: 9 } },
       changesDoc: true
     },
-    { name: "add a frame", action: { type: "add-frame", seq: "move" }, changesDoc: true },
+    { name: "add a frame", action: { type: "add-frame", seq: "bounce" }, changesDoc: true },
     {
       name: "remove a frame",
-      prepare: [{ type: "add-frame", seq: "move" }],
-      action: { type: "remove-frame", seq: "move", index: 1 },
+      prepare: [{ type: "add-frame", seq: "bounce" }],
+      action: { type: "remove-frame", seq: "bounce", index: 1 },
       changesDoc: true
     },
     {
       name: "move a frame",
-      prepare: [{ type: "add-frame", seq: "move", frame: { pose: "default", hold: 9 } }],
-      action: { type: "move-frame", seq: "move", index: 0, dir: 1 },
+      prepare: [{ type: "add-frame", seq: "bounce", frame: { pose: "default", hold: 9 } }],
+      action: { type: "move-frame", seq: "bounce", index: 0, dir: 1 },
       changesDoc: true
     },
     {
       name: "reorder a frame",
-      prepare: [{ type: "add-frame", seq: "move", frame: { pose: "default", hold: 9 } }],
-      action: { type: "reorder-frame", seq: "move", from: 0, to: 1 },
+      prepare: [{ type: "add-frame", seq: "bounce", frame: { pose: "default", hold: 9 } }],
+      action: { type: "reorder-frame", seq: "bounce", from: 0, to: 1 },
       changesDoc: true
     },
-    { name: "add a trigger", action: { type: "add-trigger", seq: "move" }, changesDoc: true },
+    { name: "add a trigger", action: { type: "add-trigger", seq: "bounce" }, changesDoc: true },
     {
       name: "change a trigger",
-      prepare: [{ type: "add-trigger", seq: "move" }],
-      action: { type: "replace-trigger", from: "click", to: "hover", seq: "move" },
+      prepare: [{ type: "add-trigger", seq: "bounce" }],
+      action: { type: "replace-trigger", from: "click", to: "hover", seq: "bounce" },
       changesDoc: true
     },
     {
       name: "remove a trigger",
-      prepare: [{ type: "add-trigger", seq: "move" }],
+      prepare: [{ type: "add-trigger", seq: "bounce" }],
       action: { type: "remove-trigger", key: "click" },
       changesDoc: true
     },
@@ -384,8 +384,8 @@ describe("undo: deliberate actions are not undoable", () => {
     const store = setup();
     stroke(store, [[0, 0]]);
     store.dispatch({ type: "set-name", name: "Blob" });
-    store.dispatch({ type: "add-frame", seq: "move" });
-    store.dispatch({ type: "add-trigger", seq: "move" });
+    store.dispatch({ type: "add-frame", seq: "bounce" });
+    store.dispatch({ type: "add-trigger", seq: "bounce" });
     store.dispatch({ type: "add-pose", name: "wave" });
     addColor(store, ["#abcdef"]);
     stroke(store, [[1, 0]]);
@@ -393,7 +393,7 @@ describe("undo: deliberate actions are not undoable", () => {
     expect(undoAll(store)).toBe(2);
     const { doc } = store.getState();
     expect(doc.name).toBe("Blob");
-    expect(doc.sequences["move"]).toHaveLength(2);
+    expect(doc.sequences["bounce"]).toHaveLength(5);
     expect(Object.keys(doc.triggers)).toEqual(["click"]);
     expect(Object.keys(doc.poses)).toEqual(["default", "wave"]);
     expect(doc.palette).toHaveLength(5);
@@ -523,6 +523,15 @@ describe("blank mascot", () => {
     const store = createMascotStore();
     store.dispatch({ type: "replace-doc", doc: createBlankMascot() });
     expect(store.getState().colorIndex).toBe(0);
+  });
+
+  it("starts with the Bounce move selected, so a fresh drawing has something to play", () => {
+    const store = createMascotStore();
+    store.dispatch({ type: "replace-doc", doc: createBlankMascot() });
+    const { doc, seqName } = store.getState();
+    expect(Object.keys(doc.sequences)).toEqual(["bounce"]);
+    expect(seqName).toBe("bounce");
+    expect(doc.sequences["bounce"]?.every(f => f.pose === "default")).toBe(true);
   });
 });
 

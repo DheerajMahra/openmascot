@@ -21,7 +21,7 @@ import {
   randomPaintColor,
   setCell
 } from "@/lib/pose-utils";
-import { buildTrigger, uniqueTrigger } from "@/lib/presets";
+import { MOVE_PRESETS, buildTrigger, uniqueTrigger } from "@/lib/presets";
 import { loadCurrent, saveCurrent } from "@/lib/storage";
 import clawdJson from "@/samples/clawd.json";
 
@@ -97,8 +97,10 @@ export const MAX_COLORS = 36;
 /** What a mascot is called when its name is empty or only spaces. */
 export const UNTITLED = "Untitled";
 
+/** A blank mascot starts with Bounce, so whatever gets drawn has a move to try right away. */
 export const createBlankMascot = (): MascotDoc => {
   const grid = { w: 24, h: 16 };
+  const bounce = MOVE_PRESETS.find(p => p.id === "bounce")?.frames ?? [];
   return {
     id: newId(),
     name: UNTITLED,
@@ -107,7 +109,7 @@ export const createBlankMascot = (): MascotDoc => {
     tick: 60,
     palette: [randomPaintColor()],
     poses: { default: blankPose(grid.w, grid.h) },
-    sequences: { move: [{ pose: "default", hold: 4 }] },
+    sequences: { bounce: bounce.map(f => ({ ...f })) },
     triggers: {}
   };
 };
