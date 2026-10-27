@@ -36,7 +36,7 @@ export const StartingPoints = () => {
           <StartTileMedia className="items-center p-0" style={BOARD_GRID}>
             <span
               aria-hidden="true"
-              className="h-2.5 w-2.5 rounded-full border-2 border-white bg-clay"
+              className="h-2.5 w-2.5 rounded-full border-2 border-white bg-orange"
             />
           </StartTileMedia>
           <StartTileBody

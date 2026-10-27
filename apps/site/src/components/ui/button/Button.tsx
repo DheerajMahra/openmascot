@@ -15,10 +15,8 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary:
-          "bg-clay-button text-white shadow-primary hover:bg-clay-button-hover hover:shadow-primary-hover",
-        ghost: "border-line bg-paper text-ink",
-        ink: "bg-ink text-white hover:bg-ink-hover"
+        primary: "bg-ink text-white hover:bg-ink-hover",
+        ghost: "border-line bg-paper text-ink"
       },
       size: {
         sm: "h-9 px-3.5 text-caption",

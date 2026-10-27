@@ -1,3 +1,5 @@
+import { ArrowUpRightIcon } from "lucide-react";
+
 import { PoseImage } from "@/components/mascot/pose-image/PoseImage";
 import { Button } from "@/components/ui/button/Button";
 import { STUDIO_URL } from "@/lib/links";
@@ -32,8 +34,9 @@ export const SiteHeader = () => (
           </a>
         ))}
       </nav>
-      <Button href={STUDIO_URL} variant="ink" size="sm" className="ml-auto hidden sm:inline-flex">
+      <Button href={STUDIO_URL} size="sm" className="ml-auto hidden sm:inline-flex">
         Open the studio
+        <ArrowUpRightIcon aria-hidden className="size-4" strokeWidth={2.25} />
       </Button>
     </div>
   </header>

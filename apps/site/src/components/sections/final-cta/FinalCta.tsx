@@ -1,3 +1,5 @@
+import { StarIcon } from "lucide-react";
+
 import { Mascot } from "@/components/mascot/mascot/Mascot";
 import { Button } from "@/components/ui/button/Button";
 import { Container } from "@/components/ui/container/Container";
@@ -31,7 +33,8 @@ export const FinalCta = () => (
           <div className="z-2 flex flex-wrap justify-center gap-2.5">
             <Button href={STUDIO_URL}>Make a mascot</Button>
             <Button href={GITHUB_URL} variant="ghost">
-              Read the code
+              <StarIcon aria-hidden className="size-4" strokeWidth={2.25} />
+              Star on GitHub
             </Button>
           </div>
           <div className="absolute bottom-0 left-1/2 z-2 flex -translate-x-1/2 items-end gap-2.5">

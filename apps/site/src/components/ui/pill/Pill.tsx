@@ -30,5 +30,5 @@ export const Pill = ({ tone, className, ...rest }: PillProps) => (
   <span className={cn(pillVariants({ tone }), className)} {...rest} />
 );
 
-/** The small clay square that opens a section label. */
-export const PillMark = () => <i aria-hidden className="inline-block size-1.75 bg-clay" />;
+/** The small red square that opens a section label. */
+export const PillMark = () => <i aria-hidden className="inline-block size-1.75 bg-red" />;

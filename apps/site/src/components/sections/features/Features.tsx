@@ -20,7 +20,7 @@ export const Features = () => (
         lede="Triggers, poses, exports, a tiny player. Nothing you have to host, nothing that phones home."
       />
       <div className="grid grid-cols-1 gap-4.5 lg:grid-cols-3">
-        <FeatureCard tint="clay" order={0} title="A simple editor" art={<EditorBoardArt />}>
+        <FeatureCard tint="moss" order={0} title="A simple editor" art={<EditorBoardArt />}>
           Pencil, mirror pencil, eraser and fill. Drag for a run of cells, and undo is <Kbd>⌘Z</Kbd>{" "}
           away.
         </FeatureCard>
@@ -32,14 +32,14 @@ export const Features = () => (
           Each pose is one drawing. Start from default and change only what differs: the eyes, the
           arms, the mouth.
         </FeatureCard>
-        <FeatureCard tint="clay" order={0} title="Takes any shape" art={<ExportsArt />}>
+        <FeatureCard tint="blue" order={0} title="Takes any shape" art={<ExportsArt />}>
           JSON for the embed script, a GIF of a move for READMEs and chat, a PNG of a pose. No
           account.
         </FeatureCard>
-        <FeatureCard tint="moss" order={1} title="A tiny player" art={<SizeArt />}>
+        <FeatureCard tint="mint" order={1} title="A tiny player" art={<SizeArt />}>
           3.9 KB gzipped, one canvas per mascot, no dependencies. Several on a page stay fast.
         </FeatureCard>
-        <FeatureCard tint="blue" order={2} title="A good guest" art={<GoodGuestArt />}>
+        <FeatureCard tint="rose" order={2} title="A good guest" art={<GoodGuestArt />}>
           Respects reduced motion, carries an accessible name, and the mascot file is plain data,
           never code.
         </FeatureCard>

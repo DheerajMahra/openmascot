@@ -16,7 +16,7 @@ export const Hearts = ({ hearts }: { hearts: Heart[] }) =>
           <span
             key={h.id}
             aria-hidden
-            className="pointer-events-none fixed top-(--y) left-(--x) z-70 -translate-1/2 animate-heart text-clay"
+            className="pointer-events-none fixed top-(--y) left-(--x) z-70 -translate-1/2 animate-heart text-red"
             style={
               {
                 "--x": `${h.x}px`,

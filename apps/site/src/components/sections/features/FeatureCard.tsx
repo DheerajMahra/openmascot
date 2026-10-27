@@ -4,7 +4,7 @@ import { Card, CardArt, CardBody, CardText, CardTitle } from "@/components/ui/ca
 import { Reveal } from "@/components/ui/reveal/Reveal";
 
 interface FeatureCardProps {
-  tint: "clay" | "gold" | "lilac" | "moss" | "blue";
+  tint: "moss" | "gold" | "lilac" | "blue" | "mint" | "rose";
   title: string;
   /** Place in its row, for the staggered reveal. */
   order: 0 | 1 | 2;

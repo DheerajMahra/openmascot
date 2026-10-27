@@ -20,11 +20,12 @@ export const Card = ({ className, ...rest }: HTMLAttributes<HTMLElement>) => (
 const cardArtVariants = cva("relative grid h-57.5 place-items-center overflow-hidden bg-dots", {
   variants: {
     tint: {
-      clay: "bg-clay-tint",
       gold: "bg-gold-tint",
       lilac: "bg-lilac-tint",
       moss: "bg-moss-tint",
-      blue: "bg-blue-tint"
+      blue: "bg-blue-tint",
+      mint: "bg-mint-tint",
+      rose: "bg-rose-tint"
     }
   },
   defaultVariants: { tint: "blue" }

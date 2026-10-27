@@ -1,13 +1,19 @@
+import { StarIcon } from "lucide-react";
+
 import { Button } from "@/components/ui/button/Button";
 import { Container } from "@/components/ui/container/Container";
 import { Pill } from "@/components/ui/pill/Pill";
 import { SpeechBubble } from "@/components/ui/speech-bubble/SpeechBubble";
 import { GITHUB_URL, STUDIO_URL } from "@/lib/links";
+import { cn } from "@/lib/utils";
 
 import { EventFlip } from "./EventFlip";
 import { HeroCast } from "./HeroCast";
 
-const NOTES = ["Two lines of HTML", "3.9 KB embed", "Stays in your browser"];
+const NOTES = [
+  { text: "3.9 KB embed", dot: "bg-red" },
+  { text: "Stays in your browser", dot: "bg-lilac" }
+];
 
 export const Hero = () => (
   <section
@@ -41,14 +47,15 @@ export const Hero = () => (
         <div className="mt-7 flex flex-wrap justify-center gap-2.5">
           <Button href={STUDIO_URL}>Make a mascot</Button>
           <Button href={GITHUB_URL} variant="ghost">
+            <StarIcon aria-hidden className="size-4" strokeWidth={2.25} />
             Star on GitHub
           </Button>
         </div>
         <ul className="flex flex-wrap justify-center gap-4 text-caption text-muted">
-          {NOTES.map(note => (
-            <li key={note} className="inline-flex items-center gap-1.5">
-              <i aria-hidden className="block size-1.5 bg-leaf" />
-              {note}
+          {NOTES.map(({ text, dot }) => (
+            <li key={text} className="inline-flex items-center gap-1.5">
+              <i aria-hidden className={cn("block size-1.5", dot)} />
+              {text}
             </li>
           ))}
         </ul>

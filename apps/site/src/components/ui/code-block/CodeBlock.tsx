@@ -8,7 +8,7 @@ export interface CodeToken {
 }
 
 const KIND_CLASS: Record<CodeTokenKind, string> = {
-  tag: "text-clay",
+  tag: "text-orange",
   attr: "text-leaf",
   value: "text-gold",
   punct: "text-code-punct"

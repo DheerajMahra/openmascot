@@ -1,8 +1,8 @@
 "use client";
 
+import { RotateCcwIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { PixelIcon } from "@/components/ui/pixel-icon/PixelIcon";
 import { PHONE, useMedia } from "@/lib/use-media";
 import { cn } from "@/lib/utils";
 
@@ -99,7 +99,7 @@ export const StoryStage = () => {
                 : "pointer-events-none scale-80 opacity-0"
             )}
           >
-            <PixelIcon name="reload" className="size-3.75" />
+            <RotateCcwIcon aria-hidden className="size-4" strokeWidth={2.25} />
           </button>
         </div>
       </div>

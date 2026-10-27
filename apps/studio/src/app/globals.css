@@ -12,12 +12,13 @@
   --color-muted: #6b645c;
   --color-line: #d9d3cb;
   --color-line-2: #efeae3;
-  --color-clay: #d97757;
-  --color-clay-deep: #be684d;
-  --color-clay-tint: #fdf3ee;
+  --color-clay: #1d1a17;
+  --color-clay-deep: #2b2723;
+  --color-clay-tint: #f1eee9;
   --color-stage: #141413;
   --color-stage-text: #a39b90;
   --color-ink-soft: #3d3833;
+  --color-ink-hover: #2b2723;
   --color-code-fg: #f1ece4;
   --color-board: #f6f2ec;
   --color-board-grid: #e3dcd2;
@@ -27,6 +28,8 @@
   --color-warning-dot: #d49a2a;
   --color-danger: #c4382a;
   --color-danger-deep: #a32b1f;
+  /* The old clay orange, kept for the blank canvas dot. */
+  --color-orange: #d97757;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
@@ -64,7 +67,7 @@
   --destructive: #be684d;
   --border: #d9d3cb;
   --input: #d9d3cb;
-  --ring: #d97757;
+  --ring: #1d1a17;
   --radius: 0.5rem;
 }
 

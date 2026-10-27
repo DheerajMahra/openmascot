@@ -6,7 +6,7 @@ import { REDUCED_MOTION, useMedia } from "@/lib/use-media";
 import { cn } from "@/lib/utils";
 
 const EVENTS = [
-  { word: "hovers", dot: "bg-clay" },
+  { word: "hovers", dot: "bg-orange" },
   { word: "clicks", dot: "bg-moss" },
   { word: "signups", dot: "bg-gold" },
   { word: "errors", dot: "bg-lilac" },
