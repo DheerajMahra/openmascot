@@ -113,12 +113,6 @@ export class Renderer {
     const x = ((f.x ?? 0) + this.pad.left) * s;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     if (pose) this.ctx.drawImage(pose, x, offset, w * s, h * s);
-    if (f.poof) {
-      this.ctx.fillStyle = "rgba(128,128,128,0.8)";
-      const fy = (h - 1) * s + offset - (f.poof === "wave" ? s : 0);
-      this.ctx.fillRect(x - s, fy, s, s);
-      this.ctx.fillRect(x + w * s, fy, s, s);
-    }
   }
 
   destroy(): void {

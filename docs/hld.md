@@ -90,7 +90,7 @@ The POC's `MascotDoc` is a good base. These are the decisions to lock before we 
   "palette": ["#141413", "#d77757"], // #rrggbb only
   "poses": { "default": "....11...." }, // w*h chars, "." = transparent
   "sequences": {
-    "jump": [{ "pose": "default", "hold": 12, "offset": 0, "x": 0, "poof": null }]
+    "jump": [{ "pose": "default", "hold": 12, "offset": 0, "x": 0 }]
   },
   "triggers": {
     "load": "jump",
@@ -111,7 +111,7 @@ The POC's `MascotDoc` is a good base. These are the decisions to lock before we 
 
 **S4. Palette is data, hex only.** `#rrggbb`, lowercase, validated. No alpha in v1; transparency is the `.` cell. Palette index order is part of the doc, so removing a color means remapping poses (studio does this, not the runtime).
 
-**S5. Sequences stay frame lists with per-frame modifiers.** `pose`, `hold`, `offset`, `x`, `poof` as today. The "Effects come in a later phase" note in the Animate design is covered by adding optional fields to a frame. Rule: **additive optional fields don't bump `schema`; the runtime ignores what it doesn't know.** Only breaking changes bump it.
+**S5. Sequences stay frame lists with per-frame modifiers.** `pose`, `hold`, `offset`, `x` as today. The "Effects come in a later phase" note in the Animate design is covered by adding optional fields to a frame. Rule: **additive optional fields don't bump `schema`; the runtime ignores what it doesn't know.** Only breaking changes bump it.
 
 **S6. Triggers stay a map, parsed into a typed union in code.** Keys like `interval:30` and `custom:success` are compact and match the "Plays..." UI (one sequence per event). The studio and runtime parse them through one `parseTrigger(key)` in `packages/schema` so the string format lives in exactly one place. Trade-off accepted: no multiple sequences per event and no per-trigger options (cooldown, probability). If we need those, that is a `schema: 2` migration to an array of rules, and the migration is mechanical.
 

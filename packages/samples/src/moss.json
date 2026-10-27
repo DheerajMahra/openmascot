@@ -42,8 +42,7 @@
     "hop": [
       {
         "pose": "squish",
-        "hold": 2,
-        "poof": "dot"
+        "hold": 2
       },
       {
         "pose": "tall",

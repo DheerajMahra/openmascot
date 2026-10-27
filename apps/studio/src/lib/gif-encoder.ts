@@ -4,10 +4,8 @@ import { EMPTY_CELL, expandSequence, sequencePadding } from "@openmascot/embed";
 
 /**
  * Minimal animated GIF writer for one move. Indexed colors only, which is exactly
- * what a pixel mascot is: palette + transparent + one grey for the poof marks.
+ * what a pixel mascot is: palette + transparent.
  */
-
-const POOF_GREY = "#8a8a8a";
 
 interface IndexedFrame {
   pixels: Uint8Array; // palette indices, 0 = transparent
@@ -41,12 +39,6 @@ const renderFrame = (
     const ch = pose[i];
     if (!ch || ch === EMPTY_CELL) continue;
     put(ox + (i % w) * scale, oy + Math.floor(i / w) * scale, parseInt(ch, 36) + 1);
-  }
-  if (frame.poof) {
-    const poofIdx = doc.palette.length + 1;
-    const fy = (h - 1) * scale + oy - (frame.poof === "wave" ? scale : 0);
-    put(ox - scale, fy, poofIdx);
-    put(ox + w * scale, fy, poofIdx);
   }
   return out;
 };
@@ -134,7 +126,7 @@ export const encodeMoveGif = (doc: MascotDoc, seqName: string, scale = 4): Blob 
   const frames: IndexedFrame[] = [];
   let last: { key: string; frame: IndexedFrame } | null = null;
   for (const f of expanded) {
-    const key = `${f.pose}|${f.offset ?? 0}|${f.x ?? 0}|${f.poof ?? ""}`;
+    const key = `${f.pose}|${f.offset ?? 0}|${f.x ?? 0}`;
     if (last && last.key === key) {
       last.frame.delayCs += doc.tick / 10;
       continue;
@@ -144,10 +136,9 @@ export const encodeMoveGif = (doc: MascotDoc, seqName: string, scale = 4): Blob 
     last = { key, frame };
   }
 
-  // Global color table: index 0 transparent, then the palette, then poof grey, padded to a power of two.
+  // Global color table: index 0 transparent, then the palette, padded to a power of two.
   const colors: Array<[number, number, number]> = [[0, 0, 0]];
   for (const hex of doc.palette) colors.push(hexToRgb(hex));
-  colors.push(hexToRgb(POOF_GREY));
   let tableBits = 1;
   while (1 << tableBits < colors.length) tableBits++;
   tableBits = Math.max(1, tableBits);

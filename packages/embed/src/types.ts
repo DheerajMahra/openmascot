@@ -6,8 +6,6 @@ export interface MascotFrame {
   offset?: number;
   /** Columns to push the drawing right (negative = left). Reads as a slide. */
   x?: number;
-  /** Small puff marks at the feet. */
-  poof?: "dot" | "wave" | null;
 }
 
 export type MascotSequence = MascotFrame[];

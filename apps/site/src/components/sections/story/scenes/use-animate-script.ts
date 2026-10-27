@@ -11,7 +11,7 @@ import { MOSS } from "@/lib/mascots";
 
 /** The move the scene builds: Moss's hop, one row at a time. */
 export const HOP: MascotFrame[] = [
-  { pose: "squish", hold: 2, poof: "dot" },
+  { pose: "squish", hold: 2 },
   { pose: "tall", hold: 3 },
   { pose: "default", hold: 1 },
   { pose: "squish", hold: 2 }
