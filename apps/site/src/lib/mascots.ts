@@ -19,7 +19,7 @@ const forSite = (doc: MascotDoc, happy: string, success = happy): MascotDoc => (
 });
 
 export const CLAWD = forSite(clawd, "celebrate", "excited");
-export const MOSS = forSite(moss, "hop");
+export const MOSS = forSite(moss, "wave");
 
 /** Both mascots, for the parade and the send-off. */
 export const CAST = [CLAWD, MOSS];

@@ -30,12 +30,12 @@ export interface WireTarget {
 /** Moss sits on the left, so the left chips are his; the right ones are Clawd's. */
 const CHIPS: { trigger: HeroTrigger; label: string; className: string; text: ReactNode }[] = [
   {
-    trigger: { who: "moss", play: "hop" },
-    label: "Play hop, Moss's hover move",
+    trigger: { who: "moss", play: "boing" },
+    label: "Play boing, Moss's hover move",
     className: "top-0 left-0 -rotate-3 lg:top-10 lg:left-9/50 lg:-rotate-6",
     text: (
       <>
-        &quot;hover&quot; → <ChipMove>hop</ChipMove>
+        &quot;hover&quot; → <ChipMove>boing</ChipMove>
       </>
     )
   },

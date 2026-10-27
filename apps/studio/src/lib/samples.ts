@@ -25,7 +25,7 @@ export const SAMPLES: Sample[] = [
   {
     key: "moss",
     doc: moss,
-    blurb: "Green slime. Squishes, hops, winks, melts."
+    blurb: "Green slime. Hops, stretches, melts into a puddle."
   }
 ];
 

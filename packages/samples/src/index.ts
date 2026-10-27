@@ -7,5 +7,5 @@ import mossJson from "./moss.json";
 /** Clawd, the official Claude Code mascot. */
 export const clawd = clawdJson as unknown as MascotDoc;
 
-/** Moss, a green slime that squishes, hops, winks and melts. */
+/** Moss, a green slime that hops, stretches, melts into a puddle and ripples. */
 export const moss = mossJson as unknown as MascotDoc;
