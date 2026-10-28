@@ -14,7 +14,9 @@ const StepBadge = ({ state, number }: { state: StepState; number: number }) => (
   <span
     className={cn(
       "flex h-6.5 w-6.5 items-center justify-center rounded-full text-[13px] font-semibold",
-      state === "current" && "bg-clay text-white",
+      // Current matches a selected move (Pill, SelectableItem): an inset ring on a tint, so it doesn't shift.
+      state === "current" &&
+        "border border-clay bg-clay-tint text-ink shadow-[inset_0_0_0_1px_var(--color-clay)]",
       state === "done" && "bg-ink text-white",
       state === "todo" && "border border-stage-text text-muted"
     )}
