@@ -38,7 +38,7 @@ export const Hero = () => (
             id="hero-title"
             className="text-hero leading-hero font-bold tracking-hero text-balance"
           >
-            Pixel mascots for every <span className="text-clay">website.</span>
+            Pixel mascots for every <span className="text-moss">website.</span>
           </h1>
         </SpeechBubble>
         <p className="flex max-w-sub flex-wrap items-center justify-center gap-2 text-sub font-medium text-ink-soft">
