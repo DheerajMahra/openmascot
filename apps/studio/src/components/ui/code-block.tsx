@@ -2,11 +2,13 @@
 
 import { useRef } from "react";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
-/** Dark code sample with a Copy button. If the clipboard is blocked, the code is selected instead. */
+/**
+ * Dark code sample with a Copy button. Long lines wrap rather than scroll.
+ * If the clipboard is blocked, the code is selected instead.
+ */
 export const CodeBlock = ({
   code,
   label,
@@ -31,11 +33,14 @@ export const CodeBlock = ({
         className
       )}
     >
-      <ScrollArea scrollbars="horizontal" className="rounded-[inherit]">
-        <pre ref={preRef} aria-label={label} className="m-0 w-max px-4.5 py-4 whitespace-pre">
-          {code}
-        </pre>
-      </ScrollArea>
+      {/* Right padding keeps the first line clear of the Copy button. */}
+      <pre
+        ref={preRef}
+        aria-label={label}
+        className="m-0 py-4 pr-20 pl-4.5 whitespace-pre-wrap wrap-anywhere"
+      >
+        {code}
+      </pre>
       <button
         type="button"
         onClick={onCopy}
