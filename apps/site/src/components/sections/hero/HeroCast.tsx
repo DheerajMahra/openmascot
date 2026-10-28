@@ -7,15 +7,15 @@ import { sequencePadding } from "@openmascot/embed";
 import { useMemo, useRef, useState } from "react";
 
 import { Mascot } from "@/components/mascot/mascot/Mascot";
-import { CLAWD, MOSS } from "@/lib/mascots";
+import { LIVE_CLAWD, LIVE_MOSS } from "@/lib/mascots";
 import { PHONE, useMedia } from "@/lib/use-media";
 
 import { TriggerWires } from "./TriggerWires";
 
 /** Left to right. */
 const CAST: { who: HeroMascot; doc: MascotDoc }[] = [
-  { who: "moss", doc: MOSS },
-  { who: "clawd", doc: CLAWD }
+  { who: "moss", doc: LIVE_MOSS },
+  { who: "clawd", doc: LIVE_CLAWD }
 ];
 
 /** The filled cells of the default pose, offset by the slack the canvas keeps for moves. */
@@ -59,8 +59,8 @@ export const HeroCast = () => {
 
   const targets = useMemo<Record<HeroMascot, WireTarget>>(
     () => ({
-      moss: { el: mossRef, box: spriteBox(MOSS, scale) },
-      clawd: { el: clawdRef, box: spriteBox(CLAWD, scale) }
+      moss: { el: mossRef, box: spriteBox(LIVE_MOSS, scale) },
+      clawd: { el: clawdRef, box: spriteBox(LIVE_CLAWD, scale) }
     }),
     [scale]
   );
