@@ -190,6 +190,6 @@
   },
   "triggers": {
     "hover": "boing",
-    "interval:6": "wobble"
+    "interval:6": "fidget"
   }
 }

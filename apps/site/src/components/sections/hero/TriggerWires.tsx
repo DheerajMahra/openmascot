@@ -50,12 +50,12 @@ const CHIPS: { trigger: HeroTrigger; label: string; className: string; text: Rea
     )
   },
   {
-    trigger: { who: "moss", play: "wobble" },
-    label: "Play wobble, the move Moss's timer plays in the studio",
+    trigger: { who: "moss", play: "fidget" },
+    label: "Play fidget, the move Moss's timer plays in the studio",
     className: "top-11 left-0 rotate-2 lg:top-auto lg:bottom-8.5 lg:left-7/50 lg:rotate-3",
     text: (
       <>
-        &quot;interval:6&quot; → <ChipMove>wobble</ChipMove>
+        &quot;interval:6&quot; → <ChipMove>fidget</ChipMove>
       </>
     )
   },
