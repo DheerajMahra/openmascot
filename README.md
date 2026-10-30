@@ -1,96 +1,127 @@
+<div align="center">
+
+<img src="docs/images/hero.gif" alt="Moss and Clawd, two pixel mascots, wired to trigger chips: &quot;hover&quot; plays boing and &quot;interval:6&quot; plays fidget on Moss; &quot;click&quot; plays celebrate and Mascot.emit(&quot;success&quot;) plays excited on Clawd. Each mascot plays its moves in turn." width="100%" />
+
 # OpenMascot
 
-Open-source pixel mascot maker. Draw a character, give it moves, and put it on any website with two lines of HTML. It reacts to your users.
+**Pixel mascots for any website.** Draw a character, give it moves, and let it react to your users.
 
-- **Wireframes:** [Studio Wireframes v2](https://claude.ai/artifact/HsCqHW9cdUMFXTyR3iDSsa?sk=KImMmpIN8JSFi-ZTZVTsUA#page-dcb81aee8d83)
-- **Design:** [High-level design](docs/hld.md)
+[![npm version](https://img.shields.io/npm/v/openmascot?color=3a6b1d&label=npm)](https://www.npmjs.com/package/openmascot)
+[![npm downloads](https://img.shields.io/npm/dm/openmascot?color=599036)](https://www.npmjs.com/package/openmascot)
+[![license](https://img.shields.io/npm/l/openmascot?color=e0a83a)](LICENSE)
 
-## Who it's for
+[Website](https://openmascot.com/) · [Studio](https://studio.openmascot.com/) · [Docs](#docs) · [Npm](https://www.npmjs.com/package/openmascot)
 
-- Makers of websites, docs and apps who want a small, friendly character that responds to what users do.
-- Anyone who wants to draw a pixel character without learning an art tool.
+</div>
 
-## Phases
+---
 
-| Phase | Goal                                                                                 | Where mascots live   |
-| ----- | ------------------------------------------------------------------------------------ | -------------------- |
-| 1     | A polished studio: start, draw, animate and share a mascot. No account needed.       | The user's browser   |
-| 2     | Accounts, a saved library in the cloud, and a community gallery.                     | The user's account   |
-| 3     | Hosted embeds: paste a snippet with only the mascot's id; no files to host yourself. | Hosted by OpenMascot |
+OpenMascot is an open-source studio for drawing small pixel characters, plus a tiny runtime ([`openmascot`](https://www.npmjs.com/package/openmascot), about 3 KB gzipped, no dependencies) that puts them on any site. A mascot is a single JSON file, so there's no account and no server, and it works anywhere.
 
-Each phase builds on the one before. Mascots made in phase 1 must keep working, unchanged, in phases 2 and 3.
+## Getting started
 
-## Phase 1 requirements
+### 1. Make
 
-The studio is a three-step flow, **Make → Animate → Share**, reached from a Start page. Users can move between steps freely.
+Open the [studio](https://studio.openmascot.com/) and draw your character on a 24 × 16 pixel board, or start from a sample (**Clawd** or **Moss**). Add poses such as `look-left`, `blink` or `arms-up`.
 
-### Start
+### 2. Animate
 
-- Show "Continue where you left off" with the most recent mascot, its name and when it was last edited.
-- Offer starting points: a blank canvas, and sample mascots (Clawd, Moss), each with a picture and a one-line description.
-- Make clear that everything stays in this browser.
+Turn poses into moves (a wave, a hop, a happy dance), then choose what plays them: page load, a click, a hover, a timer, or a custom event from your own code.
 
-### Make: draw your character
+### 3. Share
 
-- Name the mascot.
-- Draw on a fixed 24 × 16 pixel board: left click paints, right click erases, dragging paints continuously.
-- Pick and edit the mascot's colors (up to 36).
-- Create, rename and switch between **poses** (for example `default`, `look-left`, `arms-up`, `blink`). A `default` pose always exists.
-- Board menu: toggle center lines, reset to the default pose, clear the pose.
-- Short tips that help first-time users draw a good character.
-- A live preview showing exactly what a site will show, resting on the default pose while the user draws, with buttons to try each move.
+Download the mascot's JSON from the **Share** step and add it to your site.
 
-### Animate: give it moves
+**React**
 
-- Create **moves** (sequences of poses): start empty, from a template (Jump, Wave, Nod), or by duplicating an existing move.
-- Every move plays once, then the mascot rests on its `default` pose. Nothing loops on its own; an "every N seconds" trigger repeats a move.
-- Edit a move as a table of steps: pose, how long to hold it, and left/right and up/down offsets. Steps can be added, removed and reordered.
-- Show each move's length (poses, frames, seconds).
-- Define **triggers**: when something happens, play a move. Supported events: page load, click, hover, every N seconds, and a custom event the host site sends (for example "success").
-- Preview any move on demand.
+```bash
+npm install openmascot
+```
 
-### Share: take it with you
+```tsx
+import { Mascot, emit } from "openmascot/react";
+import moss from "./moss.json";
 
-- Show a summary: picture, name, number of poses and moves, file size, and whether it is ready to use.
-- Download the mascot as a single JSON file.
-- Download a GIF of a move and a PNG of a pose (8× scale).
-- Show a copyable embed snippet and explain which files to place next to the page.
+export const App = () => (
+  <>
+    <Mascot doc={moss} position="bottom-right" />
+    <button onClick={() => emit("success")}>Save</button>
+  </>
+);
+```
 
-### Embedding on a site
+It needs React 19 and works with server rendering, including Next.js.
 
-- Two lines of HTML: one script and one element pointing at the mascot file.
-- Placement either fixed in a corner of the page or inline in the content.
-- The host page can play a move or send a custom event from its own code.
-- One page can show more than one mascot.
+<details>
+<summary><b>Script tag</b></summary>
 
-## The mascot file
+Put the JSON next to your page, then add:
 
-- A mascot is one self-contained JSON file. It is the unit for saving, downloading, embedding and (later) sharing.
-- The board size is always 24 × 16. Up to 36 colors, about 32 poses, about 32 moves and about 64 steps per move.
-- Every mascot has an id that never changes once created.
-- The file carries a format version so older mascots can be upgraded automatically and never break.
-- A mascot file opened in the studio or loaded by an embed is checked first. A bad or incomplete file must never break the host page; it falls back to something safe.
+```html
+<script src="https://cdn.jsdelivr.net/npm/openmascot@0" defer></script>
+<open-mascot src="/moss.json" position="bottom-right"></open-mascot>
 
-## Quality bar
+<script>
+  Mascot.emit("success");
+</script>
+```
 
-- **Safe to embed:** mascot files are treated as untrusted. Nothing in a mascot can run code or inject markup into the host page.
-- **Small and fast:** the embed script stays tiny (target under 6 KB gzipped) and does not slow the host page, even with several mascots.
-- **Accessible:** respects the user's reduced-motion setting, and every mascot has an accessible name. The studio works with a keyboard and meets contrast guidelines.
-- **Private by default (phase 1):** no account, no server; work never leaves the browser unless the user downloads it.
-- **No lock-in:** a downloaded mascot plus the embed script works anywhere, with no OpenMascot service involved.
+</details>
 
-## Out of scope for phase 1
+## Docs
 
-- Accounts, sign-in and cloud sync.
-- Community gallery, likes and forks.
-- Hosted mascot URLs and a CDN-served embed.
-- Variable board sizes, transparency other than empty cells, and visual effects beyond the per-step options above.
+### Options
 
-## Open questions
+| `<Mascot>` prop    | `<open-mascot>` attribute | What it does                                                                       |
+| ------------------ | ------------------------- | ---------------------------------------------------------------------------------- |
+| `doc`              | (property)                | The mascot JSON as an object.                                                      |
+| `src`              | `src`                     | URL of the mascot JSON, used when there's no `doc`.                                |
+| `position`         | `position`                | `"bottom-right"` or `"bottom-left"` pins it to a corner. Omit it to render inline. |
+| `scale`            | `scale`                   | Screen pixels per mascot pixel. Default `4`.                                       |
+| `name`             | `name`                    | A handle for targeting this mascot from code.                                      |
+| `triggers={false}` | `triggers="off"`          | Turns off load, click, hover and timer triggers.                                   |
 
-- Should GIF and PNG export also be available from the embed, or stay in the studio only?
-- Which sign-in provider and hosting to use for phase 2.
+### Triggers
+
+Set these in the studio. Each one plays a move once, and then the mascot rests on its `default` pose.
+
+| Trigger          | Fires when                        |
+| ---------------- | --------------------------------- |
+| `load`           | The mascot appears on the page.   |
+| `click`          | The mascot is clicked.            |
+| `hover`          | The pointer enters the mascot.    |
+| `interval:<sec>` | Every `<sec>` seconds.            |
+| `custom:<name>`  | Your code calls `emit("<name>")`. |
+
+### Playing moves from code
+
+```ts
+import { emit, play } from "openmascot/react"; // script tag: Mascot.emit, Mascot.play
+
+emit("success"); // fire the "success" trigger on every mascot
+play("wave"); // play the move named "wave"
+emit("success", { to: "inbox" }); // only the mascot with name="inbox"
+```
+
+Both return `true` if a mascot played something. To control one mascot, call `play()`, `emit()`, `pause()` or `resume()` on its element (or its ref in React).
+
+## Development
+
+You need Node 24 and pnpm 10.
+
+```bash
+pnpm install
+pnpm dev        # studio on http://localhost:3000
+pnpm dev:site   # landing page on http://localhost:3001
+pnpm check      # typecheck, lint and format
+```
+
+## Contributing
+
+Issues and pull requests are welcome. Commits follow [Conventional Commits](https://www.conventionalcommits.org), and please run `pnpm check` and `pnpm test` before opening a PR.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+[MIT](LICENSE) © Dheeraj Mahra
+
+Clawd is a trademark of Anthropic, PBC. OpenMascot is not affiliated with Anthropic.

@@ -1,6 +1,6 @@
 import type { MascotDoc } from "openmascot";
 
-/** A mascot as the library keeps it. Thumbnails are drawn from the doc, never stored (HLD S9). */
+/** A mascot as the library keeps it. Thumbnails are drawn from the doc, never stored. */
 export interface SavedMascot {
   doc: MascotDoc;
   /** ISO time of the last save. */
