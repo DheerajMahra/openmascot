@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <TooltipProvider delay={400}>
           <MascotProvider>{children}</MascotProvider>
         </TooltipProvider>
+        <Analytics />
       </body>
     </html>
   );
