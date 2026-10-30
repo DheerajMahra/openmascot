@@ -1,6 +1,6 @@
 "use client";
 
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 import { MascotStage } from "@/components/mascot/mascot-stage";
 import { MascotThumb } from "@/components/mascot/mascot-thumb";

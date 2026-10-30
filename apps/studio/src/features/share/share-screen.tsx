@@ -23,7 +23,7 @@ export const ShareScreen = () => {
         >
           <MascotSummary doc={doc} />
           <DownloadOptions base={base} />
-          <EmbedSnippet base={base} />
+          <EmbedSnippet base={base} doc={doc} />
           <Separator className="my-4" />
           <section aria-label="Live preview">
             <LivePreview mode="live" />

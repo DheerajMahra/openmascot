@@ -1,6 +1,6 @@
 "use client";
 
-import type { MascotPlayer } from "@openmascot/embed";
+import type { MascotPlayer } from "openmascot";
 import type { RefObject } from "react";
 
 import { useRef } from "react";

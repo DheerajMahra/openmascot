@@ -1,7 +1,7 @@
 "use client";
 
 import type { SceneProps } from "./types";
-import type { MascotPlayer } from "@openmascot/embed";
+import type { MascotElement } from "openmascot/react";
 import type { CSSProperties } from "react";
 
 import { useRef } from "react";
@@ -26,7 +26,7 @@ export const AnimateScene = ({ active, replayKey, onDone, ref }: SceneProps) => 
   const editor = useRef<HTMLDivElement>(null);
   const add = useRef<HTMLDivElement>(null);
   const play = useRef<HTMLSpanElement>(null);
-  const player = useRef<MascotPlayer | null>(null);
+  const player = useRef<MascotElement | null>(null);
   const { state, run, finish } = useAnimateScript({ editor, add, play, player });
   useSceneRunner({ active, replayKey, play: run, finish, onDone });
   const length = moveLength(state.rows);
@@ -64,9 +64,7 @@ export const AnimateScene = ({ active, replayKey, onDone, ref }: SceneProps) => 
             scale={phone ? 4 : 6}
             triggers={false}
             label="Moss mascot, playing the hop"
-            onPlayer={p => {
-              player.current = p;
-            }}
+            ref={player}
             className="relative z-1"
           />
         </div>

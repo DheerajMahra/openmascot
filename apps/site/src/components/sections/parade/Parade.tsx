@@ -1,4 +1,4 @@
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 import { Mascot } from "@/components/mascot/mascot/Mascot";
 import { CAST } from "@/lib/mascots";

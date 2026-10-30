@@ -1,4 +1,4 @@
-import { EMPTY_CELL } from "@openmascot/embed";
+import { EMPTY_CELL } from "openmascot";
 
 export const blankPose = (w: number, h: number): string => EMPTY_CELL.repeat(w * h);
 

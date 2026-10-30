@@ -1,8 +1,8 @@
 "use client";
 
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
-import { poseToDataUrl } from "@openmascot/embed";
+import { poseToDataUrl } from "openmascot";
 import { useMemo, useSyncExternalStore } from "react";
 
 import { cn } from "@/lib/utils";

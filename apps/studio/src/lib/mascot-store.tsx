@@ -3,7 +3,7 @@
 import type { MascotRepository } from "@/lib/mascot-repository";
 import type { TriggerKind } from "@/lib/presets";
 import type { StartFrom } from "@/lib/samples";
-import type { MascotDoc, MascotFrame } from "@openmascot/embed";
+import type { MascotDoc, MascotFrame } from "openmascot";
 import type { ReactNode } from "react";
 
 import { clawd } from "@openmascot/samples";

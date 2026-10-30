@@ -10,7 +10,7 @@
   },
   "overrides": [
     {
-      "files": ["apps/**"],
+      "files": ["apps/**", "packages/embed/demo/react/**"],
       "plugins": ["react", "jsx-a11y", "nextjs"],
       "rules": {
         "react/react-in-jsx-scope": "off",

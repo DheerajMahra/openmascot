@@ -2,7 +2,7 @@
 
 import type { PointerEvent } from "react";
 
-import { EMPTY_CELL } from "@openmascot/embed";
+import { EMPTY_CELL } from "openmascot";
 import { useEffect, useRef } from "react";
 
 import { useDeviceSize } from "@/features/make/hooks/use-device-size";

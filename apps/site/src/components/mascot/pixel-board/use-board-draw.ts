@@ -1,8 +1,8 @@
 "use client";
 
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
-import { EMPTY_CELL } from "@openmascot/embed";
+import { EMPTY_CELL } from "openmascot";
 import { useEffect, useEffectEvent, useState } from "react";
 
 import { REDUCED_MOTION, useMedia } from "@/lib/use-media";

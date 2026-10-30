@@ -1,4 +1,4 @@
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 /** A mascot as the library keeps it. Thumbnails are drawn from the doc, never stored (HLD S9). */
 export interface SavedMascot {

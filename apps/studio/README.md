@@ -7,7 +7,7 @@ The editor. A start page and three steps, one document.
 - **Animate** (`/animate`): moves on the left with a preset picker for new ones (start from a preset, duplicate, or empty). The selected move is a pose table: one row per pose with a drag handle, the pose, and plain number fields for Hold (frames), Down (rows; negative is up, so −2 is a hop) and Slide (columns). Click a row to hold that pose in the preview; while a move plays, the row on screen is highlighted. Under it, the Triggers table maps page events (load, click, hover, every N seconds, a custom event) to moves.
 - **Share** (`/share`): a centered column with the summary, JSON / GIF / PNG downloads and the embed snippet.
 
-State lives in `src/lib/mascot-store.tsx` (a reducer over the mascot document) and autosaves to `localStorage`. Undo and redo cover drawing only: pose pixels and edits to existing palette colors. Adding a color, pose and move changes, and the mascot name are not undoable. One mascot is kept at a time and there is no Save button. Previews mount `MascotPlayer` from `@openmascot/embed`, so what you see is what the embed draws. `src/lib/gif-encoder.ts` writes animated GIFs without a dependency.
+State lives in `src/lib/mascot-store.tsx` (a reducer over the mascot document) and autosaves to `localStorage`. Undo and redo cover drawing only: pose pixels and edits to existing palette colors. Adding a color, pose and move changes, and the mascot name are not undoable. One mascot is kept at a time and there is no Save button. Previews mount `MascotPlayer` from `openmascot`, so what you see is what the embed draws. `src/lib/gif-encoder.ts` writes animated GIFs without a dependency.
 
 ```bash
 pnpm dev

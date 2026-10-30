@@ -2,7 +2,7 @@
 
 The landing page. One static page, exported to plain HTML: hero, how it works (Make → Animate → Share), features, a parade and a send-off.
 
-Every mascot on the page is drawn by `@openmascot/embed` from the samples in `@openmascot/samples`. `src/lib/mascots.ts` adapts them for the site: interval triggers come off, so nothing moves on a timer, and a click plays each one's happiest move.
+Every mascot on the page is a `<Mascot>` from `openmascot/react`, the same component the npm package ships, drawing the samples in `@openmascot/samples`. `src/components/mascot/mascot/Mascot.tsx` wraps it with sizing, labels and the pettable button. `src/lib/mascots.ts` adapts them for the site: interval triggers come off, so nothing moves on a timer, and a click plays each one's happiest move.
 
 `src/components` has three layers, each importing only from the ones below it:
 

@@ -1,4 +1,4 @@
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 import { shortTrigger } from "@/lib/presets";
 

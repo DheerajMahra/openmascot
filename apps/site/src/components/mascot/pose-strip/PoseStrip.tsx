@@ -1,4 +1,4 @@
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 import { PoseImage } from "@/components/mascot/pose-image/PoseImage";
 import { cn } from "@/lib/utils";

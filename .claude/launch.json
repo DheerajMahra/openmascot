@@ -20,10 +20,16 @@
       "port": 3002
     },
     {
-      "name": "embed-demo",
+      "name": "embed-demo-vanilla",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@openmascot/embed", "demo"],
+      "runtimeArgs": ["--filter", "openmascot", "demo"],
       "port": 4311
+    },
+    {
+      "name": "embed-demo-react",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@openmascot/demo-react", "dev"],
+      "port": 4312
     }
   ]
 }

@@ -1,4 +1,4 @@
-import type { MascotFrame, MascotPlayer } from "@openmascot/embed";
+import type { MascotFrame, MascotPlayer } from "openmascot";
 import type { RefObject } from "react";
 
 import { useEffect, useState } from "react";

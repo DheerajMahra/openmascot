@@ -43,7 +43,7 @@ Solid = phase 1, dashed = later.
 
 **`packages/schema` (new).** The single source of truth for the mascot document: TypeScript types, a runtime validator, a `migrate(doc)` function, and limits (max grid, max poses). Used by the studio (import, autosave), the API (phase 2), and a CLI/CI check. It depends on nothing. The embed runtime imports only the types, so validation code never ships in `embed.js`.
 
-**`packages/embed`.** Framework-free runtime. `MascotPlayer` renders to a canvas, plays sequences, wires triggers. Exposes a script-tag API (`data-mascot`, `Mascot.play/emit`) and an ESM export. Rules: no dependencies, no `innerHTML`, treats the doc as untrusted data (clamps and ignores unknown fields, never throws on a bad pose). Size budget target: under 6 KB gzipped.
+**`packages/embed`.** Framework-free runtime. `MascotPlayer` renders to a canvas, plays sequences, wires triggers. Exposes an `<open-mascot>` custom element that mounts and cleans up on its own, page-level `emit`/`play` (optionally `{ to: name }`), a script-tag build that registers both (`Mascot.emit/play`), a `<Mascot>` React component (`openmascot/react`, React as an optional peer) that passes the doc through a ref so it survives SSR hydration, and an ESM export with `MascotPlayer` for the studio. Rules: no dependencies, no `innerHTML`, treats the doc as untrusted data (clamps and ignores unknown fields, never throws on a bad pose). Size budget target: under 6 KB gzipped.
 
 **`apps/studio`.** Next.js 16 app. Client-heavy: editor state is a reducer (`mascot-store`) with undo history; previews go through the real runtime so what you see is what ships. Server-rendered only for the shell; there is no server dependency in phase 1.
 

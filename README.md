@@ -93,4 +93,4 @@ The studio is a three-step flow, **Make → Animate → Share**, reached from a 
 
 ## License
 
-Open source. License to be chosen.
+MIT. See [LICENSE](LICENSE).

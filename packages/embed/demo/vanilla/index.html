@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mascot embed demo · Vanilla</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <header>
+      <strong>Acme Docs</strong>
+      <span class="muted">sample host page for the mascot embed</span>
+    </header>
+
+    <main>
+      <h1>Getting started</h1>
+      <p>
+        This page mounts Clawd twice from one JSON file, as a corner buddy and inline in the tip
+        box, then Moss. Both come from the studio's samples folder. Hover over either of them.
+      </p>
+
+      <div class="tip">
+        <open-mascot name="tip" src="../../../samples/src/clawd.json" scale="3"></open-mascot>
+        <div>
+          <strong>Inline mode.</strong> Renders where the tag sits. Resting on its default pose,
+          with a look around every 6 seconds.
+        </div>
+      </div>
+
+      <h2 style="margin: 8px 0 0; font-size: 20px">Meet Moss</h2>
+      <p class="muted">
+        A second studio sample, with its own palette, poses and triggers. Hover over it.
+      </p>
+      <div class="row" style="gap: 24px">
+        <open-mascot name="moss" src="../../../samples/src/moss.json" scale="3"></open-mascot>
+      </div>
+
+      <div class="row">
+        <span class="muted">Fire sequences directly:</span>
+        <button class="secondary" type="button" onclick="Mascot.play('jump')">jump</button>
+        <button class="secondary" type="button" onclick="Mascot.play('look')">look</button>
+        <button class="secondary" type="button" onclick="Mascot.play('celebrate')">
+          celebrate
+        </button>
+        <button class="secondary" type="button" onclick="Mascot.play('spin')">spin</button>
+        <button class="secondary" type="button" onclick="Mascot.play('excited')">excited</button>
+        <button class="secondary" type="button" onclick="Mascot.play('turn')">turn</button>
+        <button class="secondary" type="button" onclick="Mascot.play('sway')">sway</button>
+        <button class="secondary" type="button" onclick="Mascot.play('look-around')">
+          look around
+        </button>
+      </div>
+
+      <div class="row">
+        <span class="muted">Just one of them:</span>
+        <button class="secondary" type="button" onclick="Mascot.play('celebrate', { to: 'buddy' })">
+          corner Clawd celebrates
+        </button>
+        <button class="secondary" type="button" onclick="Mascot.play('wave', { to: 'moss' })">
+          Moss waves
+        </button>
+      </div>
+    </main>
+
+    <!-- corner buddy -->
+    <open-mascot
+      name="buddy"
+      src="../../../samples/src/clawd.json"
+      position="bottom-right"
+      scale="5"
+    ></open-mascot>
+
+    <script src="../../dist/embed.js" defer></script>
+  </body>
+</html>

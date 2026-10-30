@@ -1,4 +1,4 @@
-import type { MascotFrame } from "@openmascot/embed";
+import type { MascotFrame } from "openmascot";
 
 /** Default hold for a step added by hand, in ticks. */
 export const DEFAULT_HOLD = 4;

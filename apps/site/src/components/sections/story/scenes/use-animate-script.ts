@@ -2,7 +2,8 @@
 
 import type { SceneRun } from "../use-scene-runner";
 import type { CursorSpot } from "./SceneCursor";
-import type { MascotDoc, MascotFrame, MascotPlayer } from "@openmascot/embed";
+import type { MascotDoc, MascotFrame } from "openmascot";
+import type { MascotElement } from "openmascot/react";
 import type { RefObject } from "react";
 
 import { useState } from "react";
@@ -58,7 +59,7 @@ interface Targets {
   editor: RefObject<HTMLElement | null>;
   add: RefObject<HTMLElement | null>;
   play: RefObject<HTMLElement | null>;
-  player: RefObject<MascotPlayer | null>;
+  player: RefObject<MascotElement | null>;
 }
 
 /** Center of `el` inside the editor, nudged by dx, dy. */

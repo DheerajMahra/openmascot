@@ -1,8 +1,8 @@
 "use client";
 
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
-import { rasterizePose } from "@openmascot/embed";
+import { rasterizePose } from "openmascot";
 import { useEffect, useRef } from "react";
 
 interface Props {

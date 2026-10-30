@@ -1,4 +1,4 @@
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 import clawdJson from "./clawd.json";
 import mossJson from "./moss.json";

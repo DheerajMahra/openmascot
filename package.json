@@ -1,5 +1,5 @@
 {
-  "name": "openmascot",
+  "name": "openmascot-monorepo",
   "version": "0.0.1",
   "private": true,
   "description": "Embeddable pixel mascot runtime: one script tag, one JSON file, a living mascot on any page.",

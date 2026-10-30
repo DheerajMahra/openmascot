@@ -1,9 +1,9 @@
 "use client";
 
-import type { MascotDoc, MascotPlayer as MascotPlayerType } from "@openmascot/embed";
+import type { MascotDoc, MascotPlayer as MascotPlayerType } from "openmascot";
 import type { RefObject } from "react";
 
-import { MascotPlayer } from "@openmascot/embed";
+import { MascotPlayer } from "openmascot";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {

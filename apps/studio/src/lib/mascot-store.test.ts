@@ -1,6 +1,6 @@
 import type { MascotRepository } from "@/lib/mascot-repository";
 import type { MascotAction, MascotStore } from "@/lib/mascot-store";
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 import { describe, expect, it } from "vitest";
 

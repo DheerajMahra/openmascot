@@ -1,6 +1,6 @@
 "use client";
 
-import type { MascotDoc, MascotFrame } from "@openmascot/embed";
+import type { MascotDoc, MascotFrame } from "openmascot";
 import type { HTMLAttributes } from "react";
 
 import { GripVerticalIcon, XIcon } from "lucide-react";

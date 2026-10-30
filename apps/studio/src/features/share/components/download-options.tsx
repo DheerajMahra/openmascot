@@ -1,6 +1,6 @@
 "use client";
 
-import { poseToDataUrl } from "@openmascot/embed";
+import { poseToDataUrl } from "openmascot";
 import { useState } from "react";
 
 import { OptionCard, OptionCardDescription, OptionCardTitle } from "@/components/ui/option-card";

@@ -1,5 +1,5 @@
 import type { MascotRepository, SavedMascot } from "@/lib/mascot-repository";
-import type { MascotDoc } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
 /** One key per mascot, so autosave rewrites only the one being edited and there's no index to drift. */
 const PREFIX = "openmascot:mascot:";

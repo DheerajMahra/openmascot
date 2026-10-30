@@ -1,6 +1,6 @@
-import type { MascotDoc, MascotFrame } from "@openmascot/embed";
+import type { MascotDoc, MascotFrame } from "openmascot";
 
-import { EMPTY_CELL, expandSequence, sequencePadding } from "@openmascot/embed";
+import { EMPTY_CELL, expandSequence, sequencePadding } from "openmascot";
 
 /**
  * Minimal animated GIF writer for one move. Indexed colors only, which is exactly

@@ -22,8 +22,8 @@ const STEPS = [
   {
     label: "Step 3 · Share",
     title: "Download one file. Paste two lines.",
-    body: "The mascot is one JSON file with its poses, moves and triggers. Drop it next to embed.js and paste the two lines the studio gives you. A GIF of a move and a PNG of a pose download from the same screen.",
-    notes: ["Works on any website", "No build step", "No backend, no account"],
+    body: "The mascot is one JSON file with its poses, moves and triggers. In a React app, install openmascot and render <Mascot>. On any other page, paste a script tag and an <open-mascot> tag. A GIF of a move and a PNG of a pose download from the same screen.",
+    notes: ["React or any website", "Script from a CDN", "No backend, no account"],
     order: "order-5",
     accent: { text: "text-gold-text", bar: "before:bg-gold" }
   }

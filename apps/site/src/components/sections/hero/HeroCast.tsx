@@ -1,10 +1,11 @@
 "use client";
 
 import type { HeroMascot, HeroTrigger, SpriteBox, WireTarget } from "./TriggerWires";
-import type { MascotDoc, MascotPlayer } from "@openmascot/embed";
+import type { MascotDoc } from "openmascot";
 
-import { sequencePadding } from "@openmascot/embed";
-import { useMemo, useRef, useState } from "react";
+import { sequencePadding } from "openmascot";
+import { emit, play } from "openmascot/react";
+import { useMemo, useRef } from "react";
 
 import { Mascot } from "@/components/mascot/mascot/Mascot";
 import { LIVE_CLAWD, LIVE_MOSS } from "@/lib/mascots";
@@ -45,6 +46,13 @@ const spriteBox = (doc: MascotDoc, scale: number): SpriteBox => {
   };
 };
 
+/** A chip fired: play or emit on the hero mascot it is wired to, and on no other. */
+const fire = (trigger: HeroTrigger) => {
+  const to = `hero-${trigger.who}`;
+  if ("play" in trigger) play(trigger.play, { to });
+  else emit(trigger.emit, { to });
+};
+
 /**
  * Moss and Clawd side by side, and the chips that make them move. On phones they share a band
  * under the copy; on wide screens the band dissolves and all of it sits along the bottom of the hero.
@@ -52,7 +60,6 @@ const spriteBox = (doc: MascotDoc, scale: number): SpriteBox => {
 export const HeroCast = () => {
   const phone = useMedia(PHONE);
   const scale = phone ? 5 : 7;
-  const [players, setPlayers] = useState<Partial<Record<HeroMascot, MascotPlayer | null>>>({});
   const mossRef = useRef<HTMLDivElement>(null);
   const clawdRef = useRef<HTMLDivElement>(null);
   const refs = { moss: mossRef, clawd: clawdRef };
@@ -65,12 +72,6 @@ export const HeroCast = () => {
     [scale]
   );
 
-  const fire = (trigger: HeroTrigger) => {
-    const player = players[trigger.who];
-    if ("play" in trigger) player?.play(trigger.play);
-    else player?.emit(trigger.emit);
-  };
-
   return (
     <div className="relative h-56 w-full lg:static lg:h-auto">
       <TriggerWires targets={targets} onFire={fire} />
@@ -82,12 +83,7 @@ export const HeroCast = () => {
             </small>
             {/* Measured by the wires: exactly the mascot's box. */}
             <div ref={refs[who]} className="leading-0">
-              <Mascot
-                doc={doc}
-                scale={scale}
-                pettable
-                onPlayer={player => setPlayers(prev => ({ ...prev, [who]: player }))}
-              />
+              <Mascot doc={doc} scale={scale} pettable name={`hero-${who}`} />
             </div>
           </div>
         ))}

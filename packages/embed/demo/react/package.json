@@ -1,0 +1,26 @@
+{
+  "name": "@openmascot/demo-react",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The embed demo page as a React app built with Vite, importing openmascot/react like a user would.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 4312",
+    "build": "vite build",
+    "preview": "vite preview --port 4312",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openmascot/samples": "workspace:*",
+    "openmascot": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.1.2",
+    "typescript": "^5",
+    "vite": "^8.3.4"
+  }
+}

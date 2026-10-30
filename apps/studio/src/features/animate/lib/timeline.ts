@@ -1,4 +1,4 @@
-import type { MascotFrame } from "@openmascot/embed";
+import type { MascotFrame } from "openmascot";
 
 /** How many ticks a step is held for; anything invalid counts as one. */
 export const holdOf = (frame: MascotFrame | undefined): number =>

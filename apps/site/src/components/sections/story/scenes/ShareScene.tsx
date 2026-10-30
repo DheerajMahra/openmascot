@@ -2,7 +2,7 @@
 
 import type { SceneProps } from "./types";
 import type { CodeToken } from "@/components/ui/code-block/CodeBlock";
-import type { MascotPlayer } from "@openmascot/embed";
+import type { MascotElement } from "openmascot/react";
 
 import { moss } from "@openmascot/samples";
 import { useRef, useState } from "react";
@@ -18,33 +18,29 @@ import { Scene } from "./Scene";
 
 const t = (kind: CodeToken["kind"], text: string): CodeToken => ({ kind, text });
 
+/** The React snippet the studio's share step leads with. */
 const SNIPPET: CodeToken[][] = [
   [
-    t("punct", "<"),
-    t("tag", "script"),
-    t("attr", " src"),
-    t("punct", "="),
-    t("value", '"embed.js"'),
-    t("attr", " defer"),
-    t("punct", "></"),
-    t("tag", "script"),
-    t("punct", ">")
+    t("tag", "import"),
+    t("punct", " { "),
+    t("attr", "Mascot"),
+    t("punct", " } "),
+    t("tag", "from"),
+    t("punct", " "),
+    t("value", '"openmascot/react"'),
+    t("punct", ";")
   ],
   [
     t("punct", "<"),
-    t("tag", "div"),
-    t("attr", " data-mascot"),
-    t("punct", "="),
-    t("value", '"moss"'),
-    t("attr", " data-src"),
-    t("punct", "="),
-    t("value", '"/moss.json"'),
-    t("attr", " data-position"),
+    t("tag", "Mascot"),
+    t("attr", " doc"),
+    t("punct", "={"),
+    t("attr", "moss"),
+    t("punct", "}"),
+    t("attr", " position"),
     t("punct", "="),
     t("value", '"bottom-right"'),
-    t("punct", "></"),
-    t("tag", "div"),
-    t("punct", ">")
+    t("punct", " />")
   ]
 ];
 const CHARS = codeLength(SNIPPET);
@@ -56,7 +52,7 @@ const FILE_SIZE = `${(new TextEncoder().encode(JSON.stringify(moss)).length / 10
 export const ShareScene = ({ active, replayKey, onDone, ref }: SceneProps) => {
   const [typed, setTyped] = useState(CHARS);
   const [arrived, setArrived] = useState(true);
-  const player = useRef<MascotPlayer | null>(null);
+  const player = useRef<MascotElement | null>(null);
 
   useSceneRunner({
     active,
@@ -64,7 +60,7 @@ export const ShareScene = ({ active, replayKey, onDone, ref }: SceneProps) => {
     onDone,
     play: async ({ wait }) => {
       setArrived(false);
-      // About 15 ms a character: the whole snippet types in under two seconds.
+      // About 15 ms a character: the whole snippet types in about a second.
       for (let i = 0; i <= CHARS; i++) {
         setTyped(i);
         await wait(10 + Math.random() * 10);
@@ -96,14 +92,7 @@ export const ShareScene = ({ active, replayKey, onDone, ref }: SceneProps) => {
               arrived ? "scale-100" : "scale-0"
             )}
           >
-            <Mascot
-              doc={MOSS}
-              scale={3}
-              triggers={false}
-              onPlayer={p => {
-                player.current = p;
-              }}
-            />
+            <Mascot doc={MOSS} scale={3} triggers={false} ref={player} />
           </span>
         </BrowserFrame>
       </div>
