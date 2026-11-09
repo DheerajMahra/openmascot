@@ -71,6 +71,25 @@ mascot.current?.play("wave");
 
 `MascotElement` is exported as a type from `openmascot/react`.
 
+## How moves place the mascot
+
+A move in the mascot JSON is a list of steps. Each step shows a pose for a while and can shift it:
+
+```json
+{ "pose": "default", "hold": 3, "x": 2, "y": 1 }
+```
+
+| Field  | Meaning                                                                                               |
+| ------ | ----------------------------------------------------------------------------------------------------- |
+| `pose` | The pose to show.                                                                                     |
+| `hold` | How many ticks it stays on screen.                                                                    |
+| `x`    | Columns to move right. Negative moves left. Default 0.                                                |
+| `y`    | Rows to move up off the floor. Negative sinks into the floor, cutting off its bottom rows. Default 0. |
+
+![The mascot rests in its box on the floor. +y hops up, -x and +x slide it left and right, -y sinks it and the rows below the floor are cut off.](https://raw.githubusercontent.com/DheerajMahra/openmascot/main/docs/moves-xy-plane.svg)
+
+The floor is the bottom edge of the mascot's own box, and the box is always the grid size times `scale`. Moves never resize it: slides and hops draw outside it, so the page around the mascot doesn't shift while it moves.
+
 ## License
 
 MIT
