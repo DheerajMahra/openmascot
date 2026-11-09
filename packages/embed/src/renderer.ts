@@ -56,12 +56,17 @@ export interface FrameShift {
 }
 
 /**
+ * Whole cells from a frame's x or y. Docs are hand-editable JSON, so anything that isn't a
+ * finite number counts as no move.
+ */
+const cells = (n: unknown): number =>
+  typeof n === "number" && Number.isFinite(n) ? Math.round(n) : 0;
+
+/**
  * Slides and hops move the whole canvas, so the mascot's box on the page never changes size.
  * Sinks are drawn lower inside the canvas, so its bottom edge, the floor, cuts them off.
  */
 export const frameShift = (frame: MascotFrame, scale: number): FrameShift => {
-  // Docs are hand-editable JSON: anything that isn't a finite number counts as no move.
-  const cells = (n: unknown) => (typeof n === "number" && Number.isFinite(n) ? Math.round(n) : 0);
   const x = cells(frame.x);
   const y = cells(frame.y);
   return { dx: x * scale, dy: y > 0 ? -y * scale : 0, sink: y < 0 ? -y * scale : 0 };

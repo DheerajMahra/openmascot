@@ -40,9 +40,9 @@ const renderFrame = (
   const out = new Uint8Array(width * height); // 0 = transparent
   const pose = doc.poses[frame.pose] ?? doc.poses["default"] ?? "";
   // Where the runtime's shifted canvas would sit, plus the drawing's sink inside it.
-  const { dx, dy, sink } = frameShift(frame, scale);
-  const ox = room.left * scale + dx;
-  const oy = room.up * scale + dy + sink;
+  const shift = frameShift(frame, scale);
+  const ox = room.left * scale + shift.dx;
+  const oy = room.up * scale + shift.dy + shift.sink;
   const put = (px: number, py: number, idx: number) => {
     for (let dy = 0; dy < scale; dy++) {
       for (let dx = 0; dx < scale; dx++) {
