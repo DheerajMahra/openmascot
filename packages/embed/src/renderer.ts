@@ -45,31 +45,26 @@ export const poseToDataUrl = (doc: MascotDoc, pose: string, scale = 8): string =
   return out.toDataURL("image/png");
 };
 
-/** Slack around the grid, in cells, so every frame's offset and slide stays on the canvas. */
-export interface MascotPadding {
-  left: number;
-  right: number;
-  up: number;
-  down: number;
+/** How a frame moves the mascot, in screen px at `scale`. */
+export interface FrameShift {
+  /** CSS translate of the canvas: right for +x. */
+  dx: number;
+  /** CSS translate of the canvas: up (negative) for +y. */
+  dy: number;
+  /** How far the drawing starts below the canvas top; the canvas bottom cuts it off. */
+  sink: number;
 }
 
 /**
- * How far frames push the drawing outside its grid. Always at least one column each side
- * and one row below, so a mascot without any offsets draws the same as before.
+ * Slides and hops move the whole canvas, so the mascot's box on the page never changes size.
+ * Sinks are drawn lower inside the canvas, so its bottom edge, the floor, cuts them off.
  */
-export const sequencePadding = (doc: MascotDoc): MascotPadding => {
-  const pad: MascotPadding = { left: 1, right: 1, up: 0, down: 1 };
-  for (const seq of Object.values(doc.sequences ?? {})) {
-    for (const f of seq) {
-      const x = Math.round(f.x ?? 0);
-      const y = Math.round(f.offset ?? 0);
-      pad.left = Math.max(pad.left, -x);
-      pad.right = Math.max(pad.right, x);
-      pad.up = Math.max(pad.up, -y);
-      pad.down = Math.max(pad.down, y);
-    }
-  }
-  return pad;
+export const frameShift = (frame: MascotFrame, scale: number): FrameShift => {
+  // Docs are hand-editable JSON: anything that isn't a finite number counts as no move.
+  const cells = (n: unknown) => (typeof n === "number" && Number.isFinite(n) ? Math.round(n) : 0);
+  const x = cells(frame.x);
+  const y = cells(frame.y);
+  return { dx: x * scale, dy: y > 0 ? -y * scale : 0, sink: y < 0 ? -y * scale : 0 };
 };
 
 /** Owns the canvas: sizing, a rasterized-pose cache, and drawing one frame. */
@@ -79,7 +74,6 @@ export class Renderer {
   private ctx: CanvasRenderingContext2D;
   private doc!: MascotDoc;
   private poses = new Map<string, HTMLCanvasElement>();
-  private pad: MascotPadding = { left: 1, right: 1, up: 0, down: 1 };
 
   constructor(private scale: number) {
     this.canvas = document.createElement("canvas");
@@ -95,7 +89,6 @@ export class Renderer {
     this.doc = doc;
     this.poses.clear();
     for (const name of Object.keys(doc.poses)) this.poses.set(name, rasterizePose(doc, name));
-    this.pad = sequencePadding(doc);
     this.canvas.setAttribute("aria-label", `${doc.name} mascot`);
     this.resize();
   }
@@ -109,10 +102,10 @@ export class Renderer {
     const { w, h } = this.doc.grid;
     const s = this.scale;
     const pose = this.poses.get(f.pose) ?? this.poses.get("default");
-    const offset = ((f.offset ?? 0) + this.pad.up) * s;
-    const x = ((f.x ?? 0) + this.pad.left) * s;
+    const { dx, dy, sink } = frameShift(f, s);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    if (pose) this.ctx.drawImage(pose, x, offset, w * s, h * s);
+    if (pose) this.ctx.drawImage(pose, 0, sink, w * s, h * s);
+    this.canvas.style.transform = dx || dy ? `translate(${dx}px, ${dy}px)` : "";
   }
 
   destroy(): void {
@@ -120,11 +113,9 @@ export class Renderer {
   }
 
   private resize(): void {
-    const { w, h } = this.doc.grid;
-    const s = this.scale;
-    const { left, right, up, down } = this.pad;
-    this.canvas.width = (w + left + right) * s; // slack each side for slides
-    this.canvas.height = (h + up + down) * s; // slack above for hops, below for crouches
+    // Always the grid: moves shift the canvas instead of growing it.
+    this.canvas.width = this.doc.grid.w * this.scale;
+    this.canvas.height = this.doc.grid.h * this.scale;
     this.canvas.style.width = `${this.canvas.width}px`;
     this.canvas.style.height = `${this.canvas.height}px`;
     this.ctx.imageSmoothingEnabled = false;

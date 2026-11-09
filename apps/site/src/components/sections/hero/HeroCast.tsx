@@ -3,7 +3,6 @@
 import type { HeroMascot, HeroTrigger, SpriteBox, WireTarget } from "./TriggerWires";
 import type { MascotDoc } from "openmascot";
 
-import { sequencePadding } from "openmascot";
 import { emit, play } from "openmascot/react";
 import { useMemo, useRef } from "react";
 
@@ -19,7 +18,7 @@ const CAST: { who: HeroMascot; doc: MascotDoc }[] = [
   { who: "clawd", doc: LIVE_CLAWD }
 ];
 
-/** The filled cells of the default pose, offset by the slack the canvas keeps for moves. */
+/** The filled cells of the default pose, in px from the mascot box's top left. */
 const spriteBox = (doc: MascotDoc, scale: number): SpriteBox => {
   const { w, h } = doc.grid;
   const pose = doc.poses.default ?? "";
@@ -37,10 +36,9 @@ const spriteBox = (doc: MascotDoc, scale: number): SpriteBox => {
     y1 = Math.max(y1, y);
   }
   if (x1 < x0) [x0, y0, x1, y1] = [0, 0, w - 1, h - 1];
-  const pad = sequencePadding(doc);
   return {
-    left: (pad.left + x0) * scale,
-    top: (pad.up + y0) * scale,
+    left: x0 * scale,
+    top: y0 * scale,
     width: (x1 - x0 + 1) * scale,
     height: (y1 - y0 + 1) * scale
   };

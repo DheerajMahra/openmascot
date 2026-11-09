@@ -1,11 +1,26 @@
 import type { MascotDoc, MascotFrame } from "openmascot";
 
-import { EMPTY_CELL, expandSequence, sequencePadding } from "openmascot";
+import { EMPTY_CELL, expandSequence, frameShift } from "openmascot";
 
 /**
  * Minimal animated GIF writer for one move. Indexed colors only, which is exactly
  * what a pixel mascot is: palette + transparent.
  */
+
+/**
+ * Room a move needs around the grid, in cells: left and right for its slides, above for its
+ * hops. Nothing below, since the floor cuts sinks off just as the runtime does.
+ */
+export const moveRoom = (frames: MascotFrame[]): { left: number; right: number; up: number } => {
+  const room = { left: 0, right: 0, up: 0 };
+  for (const f of frames) {
+    const x = Math.round(f.x ?? 0);
+    room.left = Math.max(room.left, -x);
+    room.right = Math.max(room.right, x);
+    room.up = Math.max(room.up, Math.round(f.y ?? 0));
+  }
+  return room;
+};
 
 interface IndexedFrame {
   pixels: Uint8Array; // palette indices, 0 = transparent
@@ -16,6 +31,7 @@ interface IndexedFrame {
 const renderFrame = (
   doc: MascotDoc,
   frame: MascotFrame,
+  room: { left: number; up: number },
   scale: number,
   width: number,
   height: number
@@ -23,9 +39,10 @@ const renderFrame = (
   const { w, h } = doc.grid;
   const out = new Uint8Array(width * height); // 0 = transparent
   const pose = doc.poses[frame.pose] ?? doc.poses["default"] ?? "";
-  const pad = sequencePadding(doc);
-  const ox = ((frame.x ?? 0) + pad.left) * scale;
-  const oy = ((frame.offset ?? 0) + pad.up) * scale;
+  // Where the runtime's shifted canvas would sit, plus the drawing's sink inside it.
+  const { dx, dy, sink } = frameShift(frame, scale);
+  const ox = room.left * scale + dx;
+  const oy = room.up * scale + dy + sink;
   const put = (px: number, py: number, idx: number) => {
     for (let dy = 0; dy < scale; dy++) {
       for (let dx = 0; dx < scale; dx++) {
@@ -116,22 +133,23 @@ const hexToRgb = (hex: string): [number, number, number] => [
 ];
 
 export const encodeMoveGif = (doc: MascotDoc, seqName: string, scale = 4): Blob => {
-  const { w, h } = doc.grid;
-  const pad = sequencePadding(doc);
-  const width = (w + pad.left + pad.right) * scale;
-  const height = (h + pad.up + pad.down) * scale;
-
   // Merge identical consecutive expanded frames back into one frame with a longer delay.
   const expanded = expandSequence(doc.sequences[seqName]);
+  const room = moveRoom(expanded);
+  const width = (doc.grid.w + room.left + room.right) * scale;
+  const height = (doc.grid.h + room.up) * scale;
   const frames: IndexedFrame[] = [];
   let last: { key: string; frame: IndexedFrame } | null = null;
   for (const f of expanded) {
-    const key = `${f.pose}|${f.offset ?? 0}|${f.x ?? 0}`;
+    const key = `${f.pose}|${f.x ?? 0}|${f.y ?? 0}`;
     if (last && last.key === key) {
       last.frame.delayCs += doc.tick / 10;
       continue;
     }
-    const frame = { pixels: renderFrame(doc, f, scale, width, height), delayCs: doc.tick / 10 };
+    const frame = {
+      pixels: renderFrame(doc, f, room, scale, width, height),
+      delayCs: doc.tick / 10
+    };
     frames.push(frame);
     last = { key, frame };
   }

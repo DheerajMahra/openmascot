@@ -110,7 +110,7 @@
       {
         "pose": "default",
         "hold": 1,
-        "offset": 1
+        "y": -1
       },
       {
         "pose": "default",
@@ -125,52 +125,52 @@
       {
         "pose": "kick-left",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-right",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-left",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-right",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-left",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-right",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-left",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-right",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-left",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "kick-right",
         "hold": 2,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "crouch",
@@ -189,12 +189,12 @@
       {
         "pose": "blink",
         "hold": 2,
-        "offset": 1
+        "y": -1
       },
       {
         "pose": "turn-right",
         "hold": 1,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "turn-right",
@@ -203,12 +203,12 @@
       {
         "pose": "blink",
         "hold": 2,
-        "offset": 1
+        "y": -1
       },
       {
         "pose": "turn-left",
         "hold": 1,
-        "offset": -1
+        "y": 1
       },
       {
         "pose": "turn-left",
@@ -217,7 +217,7 @@
       {
         "pose": "blink",
         "hold": 2,
-        "offset": 1
+        "y": -1
       },
       {
         "pose": "default",

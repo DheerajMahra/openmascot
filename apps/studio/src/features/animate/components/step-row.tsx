@@ -117,18 +117,18 @@ export const StepRow = ({
         onChange={hold => onChange({ hold })}
       />
       <NumberInput
-        label={`Move pose ${n} down, in rows (negative is up)`}
-        min={-doc.grid.h}
-        max={doc.grid.h}
-        value={frame.offset ?? 0}
-        onChange={offset => onChange({ offset })}
-      />
-      <NumberInput
-        label={`Slide pose ${n} sideways, in columns`}
+        label={`Move pose ${n} right, in columns (negative is left)`}
         min={-doc.grid.w}
         max={doc.grid.w}
         value={frame.x ?? 0}
         onChange={x => onChange({ x })}
+      />
+      <NumberInput
+        label={`Move pose ${n} up, in rows (negative sinks into the floor)`}
+        min={-doc.grid.h}
+        max={doc.grid.h}
+        value={frame.y ?? 0}
+        onChange={y => onChange({ y })}
       />
       <IconButton
         size="md"

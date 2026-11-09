@@ -4,7 +4,6 @@ import type { MascotDoc } from "openmascot";
 import type { MascotElement } from "openmascot/react";
 import type { CSSProperties, MouseEvent, Ref } from "react";
 
-import { sequencePadding } from "openmascot";
 import { Mascot as OpenMascot } from "openmascot/react";
 import { useRef } from "react";
 
@@ -34,15 +33,6 @@ interface MascotProps {
   className?: string;
 }
 
-/** Canvas size in px for a doc at a scale: the grid plus the slack its moves need. */
-export const mascotSize = (doc: MascotDoc, scale: number) => {
-  const pad = sequencePadding(doc);
-  return {
-    width: (doc.grid.w + pad.left + pad.right) * scale,
-    height: (doc.grid.h + pad.up + pad.down) * scale
-  };
-};
-
 const assignRef = <T,>(ref: Ref<T> | undefined, value: T | null) => {
   if (typeof ref === "function") ref(value);
   else if (ref) ref.current = value;
@@ -67,7 +57,9 @@ export const Mascot = ({
   const [hearts, burst] = useHearts();
   const accessibleName = label ?? (pettable ? `${doc.name}. Click to pet.` : `${doc.name} mascot`);
 
-  const { width, height } = mascotSize(doc, scale);
+  // Always the grid: moves shift the canvas visually and never change the box.
+  const width = doc.grid.w * scale;
+  const height = doc.grid.h * scale;
   const size = { "--mascot-w": `${width}px`, "--mascot-h": `${height}px` } as CSSProperties;
   const box = "block h-(--mascot-h) w-(--mascot-w) leading-0";
 

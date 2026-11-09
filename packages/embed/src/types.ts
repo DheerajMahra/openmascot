@@ -2,10 +2,13 @@
 export interface MascotFrame {
   pose: string;
   hold: number;
-  /** Rows to push the drawing down. Reads as a crouch. */
-  offset?: number;
-  /** Columns to push the drawing right (negative = left). Reads as a slide. */
+  /** Columns to move the drawing right (negative = left). */
   x?: number;
+  /**
+   * Rows to move the drawing up off the floor (a hop). Negative sinks it into the floor,
+   * which cuts off its bottom rows.
+   */
+  y?: number;
 }
 
 export type MascotSequence = MascotFrame[];
