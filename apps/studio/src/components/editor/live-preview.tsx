@@ -58,7 +58,7 @@ export const LivePreview = ({
         <MascotPreview
           key={mode === "live" ? JSON.stringify(doc.triggers) : undefined}
           doc={doc}
-          scale={8}
+          scale={4}
           triggers={mode === "live"}
           playerRef={playerRef}
         />
