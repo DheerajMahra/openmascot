@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+# Nothing by default: each job asks for only what it needs.
+permissions: {}
+
+# Never cancel a release half way, and never run two at once.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.rp.outputs['packages/embed--release_created'] }}
+      tag: ${{ steps.rp.outputs['packages/embed--tag_name'] }}
+      version: ${{ steps.rp.outputs['packages/embed--version'] }}
+    steps:
+      # A one-hour token from the openmascot-release GitHub App. A PR opened with the default
+      # GITHUB_TOKEN wouldn't start CI, so the required checks would never report.
+      - id: app
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      # Opens or updates the release PR; when that PR is merged, tags it and creates the
+      # GitHub Release instead.
+      - id: rp
+        uses: googleapis/release-please-action@v5
+        with:
+          token: ${{ steps.app.outputs.token }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.released == 'true'
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing: no npm token stored anywhere
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter openmascot typecheck
+      - run: pnpm --filter openmascot test
+      - run: pnpm --filter openmascot build
+      # pnpm applies publishConfig (exports pointing at dist/); npm publish from the folder wouldn't.
+      - name: Pack with pnpm
+        working-directory: packages/embed
+        run: pnpm pack --pack-destination "$RUNNER_TEMP"
+      - name: Publish with npm (trusted publishing, with provenance)
+        run: npm publish "$RUNNER_TEMP/openmascot-${{ needs.release-please.outputs.version }}.tgz" --access public
+      # The script-tag snippet loads openmascot@0, a range jsDelivr caches; refresh it.
+      - name: Refresh jsDelivr's cached openmascot@0
+        run: curl -fsS https://purge.jsdelivr.net/npm/openmascot@0
