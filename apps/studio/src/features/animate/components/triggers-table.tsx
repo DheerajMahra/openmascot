@@ -10,7 +10,7 @@ import { SectionLabel } from "@/components/ui/section-label";
 import { TriggerRow } from "@/features/animate/components/trigger-row";
 import { useEditorSelection, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 
-// Play is as wide as the step table's Hold + Down + Slide (3 × 96px plus two 10px gaps), so
+// Play is as wide as the step table's Hold + Right + Up (3 × 96px plus two 10px gaps), so
 // it lines up under them. When and Detail share what is left 3:2, and shrink far enough that this
 // table never needs more room than the step table above it.
 const TRIGGER_COLUMNS = "18px minmax(98px,3fr) minmax(76px,2fr) 308px 28px";

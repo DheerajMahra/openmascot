@@ -15,7 +15,7 @@ interface Props {
   onSelectStep: (index: number) => void;
 }
 
-/** The poses of one move, one row each: drag handle, pose, Hold, Down, Slide, remove. */
+/** The poses of one move, one row each: drag handle, pose, Hold, Right, Up, remove. */
 export const StepTable = ({ activeStep, onSelectStep }: Props) => {
   const dispatch = useMascotDispatch();
   const doc = useMascotDoc();
@@ -45,10 +45,10 @@ export const StepTable = ({ activeStep, onSelectStep }: Props) => {
           Hold <span className="normal-case">(frames)</span>
         </span>
         <span>
-          Down <span className="normal-case">(rows)</span>
+          Right <span className="normal-case">(cols)</span>
         </span>
         <span>
-          Slide <span className="normal-case">(cols)</span>
+          Up <span className="normal-case">(rows)</span>
         </span>
         <span aria-label="Remove" />
       </GridTableHeader>

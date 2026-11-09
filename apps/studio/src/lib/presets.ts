@@ -15,12 +15,12 @@ export interface MovePreset {
   frames: MascotFrame[];
 }
 
-/** One step of the default pose, moved `x` columns right and `offset` rows down. */
-const step = (hold: number, x = 0, offset = 0): MascotFrame => ({
+/** One step of the default pose, moved `x` columns right and `y` rows up. */
+const step = (hold: number, x = 0, y = 0): MascotFrame => ({
   pose: "default",
   hold,
   ...(x ? { x } : {}),
-  ...(offset ? { offset } : {})
+  ...(y ? { y } : {})
 });
 
 /**
