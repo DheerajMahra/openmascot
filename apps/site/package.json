@@ -6,7 +6,7 @@
     "dev": "next dev --port 3001",
     "build": "next build",
     "serve": "python3 -m http.server 3002 --directory out",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
     "@openmascot/samples": "workspace:*",
