@@ -11,7 +11,7 @@ export const STEP_COLUMNS = "14px 18px minmax(160px,1fr) 96px 96px 96px 28px";
 interface Props {
   /** Row to highlight: the one being shown or played in the preview. */
   activeStep: number | null;
-  /** The user clicked a row; the preview should hold that step. */
+  /** The user clicked or edited a row; the preview should hold that step. */
   onSelectStep: (index: number) => void;
 }
 
@@ -66,7 +66,11 @@ export const StepTable = ({ activeStep, onSelectStep }: Props) => {
           handleProps={reorder.handleProps(i)}
           rowProps={reorder.rowProps(i)}
           onSelect={() => onSelectStep(i)}
-          onChange={patch => dispatch({ type: "set-frame", seq: seqName, index: i, frame: patch })}
+          onChange={patch => {
+            dispatch({ type: "set-frame", seq: seqName, index: i, frame: patch });
+            // Hold the edited row in the preview so the change is visible right away.
+            onSelectStep(i);
+          }}
           onRemove={() => dispatch({ type: "remove-frame", seq: seqName, index: i })}
         />
       ))}
