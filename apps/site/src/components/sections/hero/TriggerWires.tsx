@@ -40,12 +40,12 @@ const CHIPS: { trigger: HeroTrigger; label: string; className: string; text: Rea
     )
   },
   {
-    trigger: { who: "clawd", play: "celebrate" },
-    label: "Play celebrate, Clawd's click move",
+    trigger: { who: "clawd", play: "hula" },
+    label: "Play hula, Clawd's click move",
     className: "top-11 right-0 rotate-3 lg:top-7.5 lg:right-9/50 lg:rotate-5",
     text: (
       <>
-        &quot;click&quot; → <ChipMove>celebrate</ChipMove>
+        &quot;click&quot; → <ChipMove>hula</ChipMove>
       </>
     )
   },

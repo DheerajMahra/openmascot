@@ -67,12 +67,8 @@ export const App = () => (
 
       <div className="row">
         <span className="muted">Just one of them:</span>
-        <button
-          className="secondary"
-          type="button"
-          onClick={() => play("celebrate", { to: "buddy" })}
-        >
-          corner Clawd celebrates
+        <button className="secondary" type="button" onClick={() => play("hula", { to: "buddy" })}>
+          corner Clawd dances the hula
         </button>
         <button className="secondary" type="button" onClick={() => play("wave", { to: "moss" })}>
           Moss waves

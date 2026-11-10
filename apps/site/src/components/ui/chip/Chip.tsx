@@ -3,7 +3,7 @@ import type { ComponentProps, HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Ink-bordered sticker with a hard offset shadow, for code-ish labels like `"click" → celebrate`.
+ * Ink-bordered sticker with a hard offset shadow, for code-ish labels like `"click" → hula`.
  * Rotate and place it from the outside.
  */
 export const Chip = ({ className, ...rest }: ComponentProps<"span">) => (
