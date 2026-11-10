@@ -41,7 +41,7 @@ const PILLS: { text: ReactNode; speed: number; className: string }[] = [
   {
     text: (
       <>
-        &quot;click&quot; → <ChipMove>celebrate</ChipMove>
+        &quot;click&quot; → <ChipMove>hula</ChipMove>
       </>
     ),
     speed: -0.14,

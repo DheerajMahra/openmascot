@@ -24,7 +24,7 @@ const still = (doc: MascotDoc): MascotDoc => ({
 });
 
 /** Live: with the studio's every-6-seconds move. Only the hero and the send-off use these. */
-export const LIVE_CLAWD = forSite(clawd, "celebrate", "excited");
+export const LIVE_CLAWD = forSite(clawd, "hula", "excited");
 export const LIVE_MOSS = forSite(moss, "wave");
 
 export const CLAWD = still(LIVE_CLAWD);
