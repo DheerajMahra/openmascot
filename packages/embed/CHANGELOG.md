@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/DheerajMahra/openmascot/compare/openmascot-v0.2.0...openmascot-v0.2.1) (2026-11-10)
+
+
+### Features
+
+* **samples:** rebuild Clawd from the app sprites with new moves ([b246bba](https://github.com/DheerajMahra/openmascot/commit/b246bbaad52cc55b294536dff73d19592838581d))
+
 ## [0.2.0](https://github.com/DheerajMahra/openmascot/compare/openmascot-v0.1.0...openmascot-v0.2.0) (2026-11-09)
 
 

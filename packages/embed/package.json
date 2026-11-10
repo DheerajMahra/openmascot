@@ -1,6 +1,6 @@
 {
   "name": "openmascot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Pixel mascots for any website: a <Mascot> React component and a one-line script tag.",
   "keywords": [
     "animation",
