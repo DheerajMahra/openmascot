@@ -32,5 +32,13 @@
       }
     }
   ],
-  "ignorePatterns": ["**/node_modules", "dist", "coverage", ".next", "out", "next-env.d.ts"]
+  "ignorePatterns": [
+    "**/node_modules",
+    "dist",
+    "coverage",
+    ".next",
+    "out",
+    "next-env.d.ts",
+    ".agents/skills"
+  ]
 }
