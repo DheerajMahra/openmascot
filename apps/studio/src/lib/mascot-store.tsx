@@ -1,5 +1,6 @@
 "use client";
 
+import type { MascotEdit, UndoStacks } from "@/lib/edit-history";
 import type { MascotRepository } from "@/lib/mascot-repository";
 import type { StartFrom } from "@/lib/samples";
 import type { MascotDoc, MascotFrame } from "openmascot";
@@ -19,6 +20,15 @@ import {
   toPoseName,
   toMoveName
 } from "@/lib/doc-edits";
+import {
+  canRedo,
+  canUndo,
+  dropPoseEdits,
+  record,
+  renamePoseEdits,
+  takeRedo,
+  takeUndo
+} from "@/lib/edit-history";
 import { mascotRepository } from "@/lib/local-mascot-repository";
 import { blankPose, floodFill, normalizePose, setCell } from "@/lib/pose-utils";
 
@@ -28,11 +38,6 @@ export interface BoardOptions {
   centerLines: boolean;
 }
 
-/** One undo step: a pose's pixels or one palette slot, before and after. Undo tracks drawing only. */
-export type MascotEdit =
-  | { kind: "pixels"; pose: string; before: string; after: string }
-  | { kind: "color"; index: number; before: string; after: string };
-
 /**
  * Where the open mascot stands. `loading`: nothing opened for this URL yet. `draft`: a fresh copy
  * from a starting point, not stored until its first change. `saved`: in the library, every change
@@ -40,7 +45,7 @@ export type MascotEdit =
  */
 export type MascotStatus = "loading" | "draft" | "saved" | "missing";
 
-export interface MascotState {
+export interface MascotState extends UndoStacks {
   doc: MascotDoc;
   status: MascotStatus;
   /** The starting point a draft was made from; null once saved. */
@@ -51,8 +56,6 @@ export interface MascotState {
   seqName: string;
   tool: Tool;
   colorIndex: number;
-  history: MascotEdit[];
-  future: MascotEdit[];
   board: BoardOptions;
 }
 
@@ -102,7 +105,6 @@ export type MascotAction =
   | { type: "set-board-option"; option: keyof BoardOptions; value: boolean };
 
 const CLAWD = clawd;
-const MAX_HISTORY = 50;
 
 /** Clawd stands in until a mascot opens; nothing renders it while status is `loading`. */
 const initialState: MascotState = {
@@ -117,43 +119,6 @@ const initialState: MascotState = {
   history: [],
   future: [],
   board: { centerLines: true }
-};
-
-/** A gesture that changed nothing, like a click on a cell already that color. Only the top entry can be one. */
-const isEmptyEdit = (e: MascotEdit): boolean => e.before === e.after;
-
-const sameTarget = (a: MascotEdit, b: MascotEdit): boolean =>
-  a.kind === "pixels"
-    ? b.kind === "pixels" && a.pose === b.pose
-    : b.kind === "color" && a.index === b.index;
-
-/** History without an empty entry on top. */
-const settled = (history: MascotEdit[]): MascotEdit[] => {
-  const top = history[history.length - 1];
-  return top && isEmptyEdit(top) ? history.slice(0, -1) : history;
-};
-
-/**
- * Records a drawing edit. A commit starts a new step; later ticks of the same gesture stretch it,
- * and a tick with no matching step (tuning a just-added color) goes unrecorded. Redo is dropped
- * once the step actually changes something.
- */
-const record = (
-  s: MascotState,
-  edit: MascotEdit,
-  commit: boolean
-): Pick<MascotState, "history" | "future"> => {
-  if (commit) {
-    const history = [...settled(s.history).slice(-(MAX_HISTORY - 1)), edit];
-    return { history, future: isEmptyEdit(edit) ? s.future : [] };
-  }
-  const top = s.history[s.history.length - 1];
-  if (!top || !sameTarget(top, edit)) return { history: s.history, future: s.future };
-  const stretched = { ...top, after: edit.after };
-  return {
-    history: [...s.history.slice(0, -1), stretched],
-    future: isEmptyEdit(stretched) ? s.future : []
-  };
 };
 
 /** New pixels for a pose, recorded for undo. */
@@ -273,15 +238,11 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       for (const [k, seq] of Object.entries(doc.sequences)) {
         sequences[k] = seq.map(f => (f.pose === a.from ? { ...f, pose: to } : f));
       }
-      // Undo steps follow the pose to its new name.
-      const rename = (e: MascotEdit): MascotEdit =>
-        e.kind === "pixels" && e.pose === a.from ? { ...e, pose: to } : e;
       return {
         ...s,
         doc: { ...doc, poses: renameKey(doc.poses, a.from, to), sequences },
         poseName: s.poseName === a.from ? to : s.poseName,
-        history: s.history.map(rename),
-        future: s.future.map(rename)
+        ...renamePoseEdits(s, a.from, to)
       };
     }
     case "delete-pose": {
@@ -290,34 +251,20 @@ const reducer = (s: MascotState, a: MascotAction): MascotState => {
       for (const [k, seq] of Object.entries(doc.sequences)) {
         sequences[k] = seq.map(f => (f.pose === a.name ? { ...f, pose: "default" } : f));
       }
-      // Deleting is final: the pose's undo steps go with it.
-      const keep = (e: MascotEdit) => e.kind !== "pixels" || e.pose !== a.name;
       return {
         ...s,
         doc: { ...doc, poses: omitKey(doc.poses, a.name), sequences },
         poseName: s.poseName === a.name ? "default" : s.poseName,
-        history: s.history.filter(keep),
-        future: s.future.filter(keep)
+        ...dropPoseEdits(s, a.name)
       };
     }
     case "undo": {
-      const history = settled(s.history);
-      const edit = history[history.length - 1];
-      if (!edit) return s;
-      return {
-        ...applyEdit(s, edit, edit.before),
-        history: history.slice(0, -1),
-        future: [edit, ...s.future].slice(0, MAX_HISTORY)
-      };
+      const step = takeUndo(s);
+      return step ? { ...applyEdit(s, step.edit, step.edit.before), ...step.stacks } : s;
     }
     case "redo": {
-      const edit = s.future[0];
-      if (!edit) return s;
-      return {
-        ...applyEdit(s, edit, edit.after),
-        future: s.future.slice(1),
-        history: [...settled(s.history).slice(-(MAX_HISTORY - 1)), edit]
-      };
+      const step = takeRedo(s);
+      return step ? { ...applyEdit(s, step.edit, step.edit.after), ...step.stacks } : s;
     }
     case "add-seq": {
       let name = toMoveName(a.name) || "move";
@@ -554,11 +501,6 @@ export const useEditorTool = (): { tool: Tool; colorIndex: number } => ({
 });
 
 export const useBoardOptions = (): BoardOptions => useMascotSelector(s => s.board);
-
-/** Whether undo has a step that changes something; the top one can be an empty click. */
-export const canUndo = (s: MascotState): boolean => s.history.some(e => !isEmptyEdit(e));
-
-export const canRedo = (s: MascotState): boolean => s.future.length > 0;
 
 export const useUndoAvailability = (): { canUndo: boolean; canRedo: boolean } => ({
   canUndo: useMascotSelector(canUndo),

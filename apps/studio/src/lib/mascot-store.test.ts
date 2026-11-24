@@ -4,13 +4,8 @@ import type { MascotDoc } from "openmascot";
 
 import { describe, expect, it } from "vitest";
 
-import {
-  canRedo,
-  canUndo,
-  createAutosave,
-  createMascotStore,
-  showsMascot
-} from "@/lib/mascot-store";
+import { canUndo, canRedo } from "@/lib/edit-history";
+import { createAutosave, createMascotStore, showsMascot } from "@/lib/mascot-store";
 import { cellAt, colorChar } from "@/lib/pose-utils";
 import { createBlankMascot } from "@/lib/samples";
 
