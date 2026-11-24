@@ -11,6 +11,18 @@ export const prefersReducedMotion = (): boolean =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
+ * Whether two trigger maps play the same move for the same events. Key order doesn't matter, and
+ * comparing entry by entry builds no strings: setDoc runs on every edit in the studio.
+ */
+const sameTriggers = (a: Record<string, string>, b: Record<string, string>): boolean => {
+  const keys = Object.keys(a);
+  return (
+    keys.length === Object.keys(b).length &&
+    keys.every(key => Object.prototype.hasOwnProperty.call(b, key) && a[key] === b[key])
+  );
+};
+
+/**
  * Plays a mascot inside an element. A thin facade: the Animator holds playback state,
  * the Renderer draws it, the TriggerManager reacts to events. This class owns the timer
  * and the DOM mount.
@@ -22,12 +34,18 @@ export class MascotPlayer {
   private readonly animator = new Animator();
   private readonly renderer: Renderer;
   private triggers: TriggerManager | null = null;
+  /** A copy of the trigger map the current listeners were built from, to rebuild only on a change. */
+  private wiredTriggers: Record<string, string> | null = null;
+  /** Set by destroy(). A destroyed player never takes a doc or wires listeners again. */
+  private destroyed = false;
+  private readonly wantsTriggers: boolean;
   private timer: ReturnType<typeof setTimeout> | null = null;
   private reduced: boolean;
 
   constructor(el: HTMLElement, doc: MascotDoc, opts: MascotOptions = {}) {
     this.el = el;
     this.reduced = opts.reducedMotion ?? prefersReducedMotion();
+    this.wantsTriggers = opts.triggers !== false;
     this.renderer = new Renderer(opts.scale ?? 4);
 
     if (opts.position) {
@@ -40,12 +58,9 @@ export class MascotPlayer {
     el.appendChild(this.renderer.canvas);
 
     this.setDoc(doc);
-    if (opts.triggers !== false) {
-      this.triggers = new TriggerManager(this, doc.triggers ?? {});
-      this.triggers.attach();
-      const load = doc.triggers?.load;
-      if (load) this.play(load);
-    }
+    // Load fires once, when the mascot first appears, not on later doc swaps.
+    const load = this.wantsTriggers ? doc.triggers?.load : undefined;
+    if (load) this.play(load);
   }
 
   get canvas(): HTMLCanvasElement {
@@ -57,12 +72,18 @@ export class MascotPlayer {
     return this.animator.current;
   }
 
-  /** Swap the document in place. Keeps the current sequence playing when it still exists. */
+  /**
+   * Swap the document in place. Keeps the current sequence playing when it still exists, and
+   * rewires click, hover and interval triggers when the doc's trigger map changed. Does nothing
+   * once the player is destroyed.
+   */
   setDoc(doc: MascotDoc): void {
+    if (this.destroyed) return;
     this.doc = doc;
     const lost = this.animator.load(doc);
     this.renderer.setDoc(doc);
     if (lost) this.stopTimer();
+    this.wireTriggers();
     this.draw();
   }
 
@@ -123,10 +144,29 @@ export class MascotPlayer {
   }
 
   destroy(): void {
+    this.destroyed = true;
     this.stopTimer();
+    this.unwireTriggers();
+    this.renderer.destroy();
+  }
+
+  /** Rebuilds the trigger listeners from the doc, unless they already match it. */
+  private wireTriggers(): void {
+    if (!this.wantsTriggers) return;
+    const map = this.doc.triggers ?? {};
+    // Same triggers: keep the listeners, so interval timers aren't restarted by unrelated edits.
+    if (this.wiredTriggers && sameTriggers(map, this.wiredTriggers)) return;
+    this.unwireTriggers();
+    this.triggers = new TriggerManager(this, map);
+    this.triggers.attach();
+    // A copy, so a caller that edits the same object in place still counts as a change.
+    this.wiredTriggers = { ...map };
+  }
+
+  private unwireTriggers(): void {
     this.triggers?.detach();
     this.triggers = null;
-    this.renderer.destroy();
+    this.wiredTriggers = null;
   }
 
   private stopTimer(): void {
