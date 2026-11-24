@@ -209,15 +209,11 @@ const omitKey = <T,>(obj: Record<string, T>, key: string): Record<string, T> => 
 };
 
 /**
- * Tidies a doc as it loads: docs saved before moves stopped looping carry an "idle" trigger the
- * runtime no longer reads, and a name left blank (say, the page closed mid-edit) reads as Untitled.
+ * A name left blank (say, the page closed mid-edit) reads as Untitled once the mascot opens again.
+ * Format migrations happen earlier, in the runtime's parseMascotDoc, as the library reads a doc.
  */
-const migrateDoc = (doc: MascotDoc): MascotDoc => {
-  let next = doc;
-  if ("idle" in next.triggers) next = { ...next, triggers: omitKey(next.triggers, "idle") };
-  if (!next.name.trim()) next = { ...next, name: UNTITLED };
-  return next;
-};
+const withName = (doc: MascotDoc): MascotDoc =>
+  doc.name.trim() ? doc : { ...doc, name: UNTITLED };
 
 /** A move name as stored: lower case letters and digits joined by single "-". */
 export const toMoveName = (name: string): string =>
@@ -263,7 +259,7 @@ const freeTriggerKey = (triggers: Record<string, string>): string => {
 
 /** A freshly opened mascot: its default pose and first move selected, no undo history. */
 const opened = (s: MascotState, doc: MascotDoc): MascotState => {
-  const next = migrateDoc(doc);
+  const next = withName(doc);
   return {
     ...s,
     doc: next,
