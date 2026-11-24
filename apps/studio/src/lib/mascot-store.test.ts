@@ -1,11 +1,13 @@
+import type { MascotAction } from "@/lib/mascot-reducer";
 import type { MascotRepository } from "@/lib/mascot-repository";
-import type { MascotAction, MascotStore } from "@/lib/mascot-store";
+import type { MascotStore } from "@/lib/mascot-store";
 import type { MascotDoc } from "openmascot";
 
 import { describe, expect, it } from "vitest";
 
 import { canUndo, canRedo } from "@/lib/edit-history";
-import { createAutosave, createMascotStore, showsMascot } from "@/lib/mascot-store";
+import { showsMascot } from "@/lib/mascot-reducer";
+import { createAutosave, createMascotStore } from "@/lib/mascot-store";
 import { cellAt, colorChar } from "@/lib/pose-utils";
 import { createBlankMascot } from "@/lib/samples";
 

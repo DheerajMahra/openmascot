@@ -7,7 +7,8 @@ import { Suspense, useEffect } from "react";
 
 import { MissingMascot } from "@/components/editor/missing-mascot";
 import { mascotRepository } from "@/lib/local-mascot-repository";
-import { showsMascot, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
+import { showsMascot } from "@/lib/mascot-reducer";
+import { useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 import { isStartFrom, startDoc } from "@/lib/samples";
 
 /**
