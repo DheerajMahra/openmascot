@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createLocalMascotRepository } from "@/lib/local-mascot-repository";
-import { createBlankMascot } from "@/lib/mascot-store";
+import { createBlankMascot } from "@/lib/samples";
 
 /** Just enough of the Web Storage API, backed by a Map. */
 class MemoryStorage implements Storage {

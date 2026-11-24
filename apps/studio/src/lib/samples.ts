@@ -1,9 +1,11 @@
 import type { MascotDoc } from "openmascot";
 
 import { clawd, moss } from "@openmascot/samples";
+import { DEFAULT_TICK, GRID } from "openmascot";
 
-import { createBlankMascot } from "@/lib/mascot-store";
-import { newId } from "@/lib/pose-utils";
+import { UNTITLED } from "@/lib/doc-edits";
+import { blankPose, newId, randomPaintColor } from "@/lib/pose-utils";
+import { MOVE_PRESETS } from "@/lib/presets";
 
 export interface Sample {
   /** Names the sample in a starting-point URL (`?from=clawd`). */
@@ -28,6 +30,23 @@ export const SAMPLES: Sample[] = [
     blurb: "Green slime. Hops, stretches, melts into a puddle."
   }
 ];
+
+/** A blank mascot starts with Bounce, so whatever gets drawn has a move to try right away. */
+export const createBlankMascot = (): MascotDoc => {
+  const grid = { ...GRID };
+  const bounce = MOVE_PRESETS.find(p => p.id === "bounce")?.frames ?? [];
+  return {
+    id: newId(),
+    name: UNTITLED,
+    version: 1,
+    grid,
+    tick: DEFAULT_TICK,
+    palette: [randomPaintColor()],
+    poses: { default: blankPose(grid.w, grid.h) },
+    sequences: { bounce: bounce.map(f => ({ ...f })) },
+    triggers: {}
+  };
+};
 
 /** A fresh copy with its own id, so edits never touch the sample. */
 export const cloneSample = (sample: Sample, id = newId()): MascotDoc => ({

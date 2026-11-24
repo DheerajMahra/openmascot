@@ -3,7 +3,7 @@ import type { MascotDoc } from "openmascot";
 import { describe, expect, it } from "vitest";
 
 import { previewChips } from "@/components/editor/preview-chips";
-import { createBlankMascot } from "@/lib/mascot-store";
+import { createBlankMascot } from "@/lib/samples";
 
 const STEP = [{ pose: "default", hold: 4 }];
 
