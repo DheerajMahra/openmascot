@@ -4,10 +4,10 @@ import type { MascotDoc, MascotPlayer as MascotPlayerType } from "openmascot";
 import type { RefObject } from "react";
 
 import { MascotPlayer } from "openmascot";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
-  /** Document to play. Later changes are pushed to the running player. */
+  /** Document to play. Later changes, triggers included, are pushed to the running player. */
   doc: MascotDoc;
   scale?: number;
   /** Wire click, hover and interval triggers from the doc. */
@@ -21,13 +21,18 @@ interface Props {
 export const MascotPreview = ({ doc, scale = 8, triggers = true, playerRef, className }: Props) => {
   const hostRef = useRef<HTMLDivElement>(null);
   const localRef = useRef<MascotPlayerType | null>(null);
-  // The doc at mount time. The second effect keeps the player current after that.
-  const [initialDoc] = useState(doc);
+  // The latest doc. Edits reach the running player through setDoc (second effect); a player
+  // rebuilt for a new scale or trigger setting starts from this, not from the doc it first had.
+  const latestDoc = useRef(doc);
 
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
-    const player = new MascotPlayer(el, initialDoc, { scale, triggers, reducedMotion: false });
+    const player = new MascotPlayer(el, latestDoc.current, {
+      scale,
+      triggers,
+      reducedMotion: false
+    });
     localRef.current = player;
     if (playerRef) playerRef.current = player;
     return () => {
@@ -35,9 +40,10 @@ export const MascotPreview = ({ doc, scale = 8, triggers = true, playerRef, clas
       localRef.current = null;
       if (playerRef) playerRef.current = null;
     };
-  }, [initialDoc, scale, triggers, playerRef]);
+  }, [scale, triggers, playerRef]);
 
   useEffect(() => {
+    latestDoc.current = doc;
     localRef.current?.setDoc(doc);
   }, [doc]);
 
