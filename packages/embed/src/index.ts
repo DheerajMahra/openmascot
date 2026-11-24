@@ -1,6 +1,7 @@
 export { Animator, expandSequence } from "./animator";
 export { MASCOT_TAG, MascotElement, defineMascotElement, emit, play } from "./element";
 export type { MascotTarget } from "./element";
+export { parseMascotDoc } from "./parse";
 export { MascotPlayer, prefersReducedMotion } from "./player";
 export {
   DEFAULT_TICK,
