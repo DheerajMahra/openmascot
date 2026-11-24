@@ -120,6 +120,8 @@ pnpm check      # typecheck, lint and format
 
 Issues and pull requests are welcome. Commits follow [Conventional Commits](https://www.conventionalcommits.org), and please run `pnpm check` and `pnpm test` before opening a PR.
 
+The reasons behind the monorepo layout, the mascot format and how the runtime ships are recorded in [`docs/decisions`](docs/decisions/README.md). A change that picks a framework, data store, public API or file format comes with a new decision record.
+
 ## License
 
 [MIT](LICENSE) © Dheeraj Mahra
