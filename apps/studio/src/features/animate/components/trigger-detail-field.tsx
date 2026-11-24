@@ -1,6 +1,6 @@
 "use client";
 
-import type { TriggerKind } from "@/lib/presets";
+import type { TriggerType } from "openmascot";
 import type { KeyboardEvent } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 interface Props {
   number: number;
   triggerKey: string;
-  kind: TriggerKind | null;
+  kind: TriggerType | null;
   param: string;
   /** Called with the rebuilt trigger key once the user leaves the field; false if it's taken. */
   onCommit: (key: string) => boolean;

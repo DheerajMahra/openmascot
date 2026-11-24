@@ -1,6 +1,6 @@
 "use client";
 
-import type { TriggerKind } from "@/lib/presets";
+import type { TriggerType } from "openmascot";
 
 import { XIcon } from "lucide-react";
 
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { TriggerDetailField } from "@/features/animate/components/trigger-detail-field";
 import { useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
-import { TRIGGER_KINDS, parseTrigger, uniqueTrigger } from "@/lib/presets";
+import { TRIGGER_KINDS, triggerParts, uniqueTrigger } from "@/lib/presets";
 
 interface Props {
   number: number;
@@ -30,7 +30,7 @@ export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
   const dispatch = useMascotDispatch();
   const triggers = useMascotSelector(s => s.doc.triggers);
   const sequences = useMascotSelector(s => s.doc.sequences);
-  const { kind, param } = parseTrigger(key);
+  const { kind, param } = triggerParts(key);
   const moves = Object.keys(sequences);
 
   /** False when another row already owns `to`; trigger keys are unique. */
@@ -43,7 +43,7 @@ export const TriggerRow = ({ number: n, triggerKey: key, seq }: Props) => {
   return (
     <GridTableRow className="transition-colors hover:bg-paper-2">
       <span className="font-mono text-xs text-muted">{n}</span>
-      <Select<TriggerKind>
+      <Select<TriggerType>
         items={TRIGGER_KINDS.map(k => ({ value: k.id, label: k.label }))}
         value={kind}
         onValueChange={next => next && replace(uniqueTrigger(next, triggers))}
