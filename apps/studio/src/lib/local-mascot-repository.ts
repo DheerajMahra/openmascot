@@ -1,6 +1,8 @@
 import type { MascotRepository, SavedMascot } from "@/lib/mascot-repository";
 import type { MascotDoc } from "openmascot";
 
+import { parseMascotDoc } from "openmascot";
+
 /** One key per mascot, so autosave rewrites only the one being edited and there's no index to drift. */
 const PREFIX = "openmascot:mascot:";
 /** Where the previous version kept its single mascot. */
@@ -9,12 +11,14 @@ const LEGACY_EDITED_KEY = "openmascot:edited";
 
 const keyFor = (id: string): string => `${PREFIX}${id}`;
 
+/** A stored entry, with its doc checked and brought up to date by the runtime, or null. */
 const parse = (raw: string | null): SavedMascot | null => {
   if (!raw) return null;
   try {
-    const value = JSON.parse(raw) as Partial<SavedMascot> | null;
-    if (typeof value?.doc?.id !== "string" || typeof value.updatedAt !== "string") return null;
-    return value as SavedMascot;
+    const value = JSON.parse(raw) as { doc?: unknown; updatedAt?: unknown } | null;
+    const doc = parseMascotDoc(value?.doc);
+    if (!doc || typeof value?.updatedAt !== "string") return null;
+    return { doc, updatedAt: value.updatedAt };
   } catch {
     return null;
   }

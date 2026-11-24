@@ -101,6 +101,30 @@ describe("local mascot repository", () => {
     expect(await repo.get("m_shape")).toBeNull();
   });
 
+  it("skips an entry whose doc can't be drawn", async () => {
+    const { grid: _grid, ...broken } = mascot("m_grid");
+    storage.setItem(
+      "openmascot:mascot:m_grid",
+      JSON.stringify({ doc: broken, updatedAt: "2026-10-25T10:00:00.000Z" })
+    );
+    const repo = createLocalMascotRepository(() => storage);
+    expect(await repo.get("m_grid")).toBeNull();
+    expect(await repo.list()).toEqual([]);
+  });
+
+  it("drops the idle trigger older saves carry", async () => {
+    const doc = mascot("m_old");
+    storage.setItem(
+      "openmascot:mascot:m_old",
+      JSON.stringify({
+        doc: { ...doc, triggers: { idle: "bounce", click: "bounce" } },
+        updatedAt: "2026-10-25T10:00:00.000Z"
+      })
+    );
+    const repo = createLocalMascotRepository(() => storage);
+    expect((await repo.get("m_old"))?.doc.triggers).toEqual({ click: "bounce" });
+  });
+
   it("works in memory only when storage is unavailable", async () => {
     const repo = createLocalMascotRepository(() => {
       throw new Error("SecurityError");
