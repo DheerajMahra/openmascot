@@ -53,15 +53,7 @@ export const LivePreview = ({
         <p className="m-0 text-[13px] leading-relaxed text-muted">{HINTS[mode]}</p>
       </div>
       <MascotStage>
-        {/* The player wires triggers once, at mount, so Live remounts it when they change:
-            a page load first mounts the sample, then the stored mascot arrives. */}
-        <MascotPreview
-          key={mode === "live" ? JSON.stringify(doc.triggers) : undefined}
-          doc={doc}
-          scale={4}
-          triggers={mode === "live"}
-          playerRef={playerRef}
-        />
+        <MascotPreview doc={doc} scale={4} triggers={mode === "live"} playerRef={playerRef} />
       </MascotStage>
 
       <div className="flex flex-col gap-1.5">
