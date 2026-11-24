@@ -638,3 +638,111 @@ describe("which mascot the editor shows", () => {
     expect(showsMascot(saved.getState(), saved.getState().doc.id)).toBe(false);
   });
 });
+
+/** The holds of a move's steps, which is enough to tell steps apart in these tests. */
+const holds = (store: MascotStore, seq = "bounce") =>
+  store.getState().doc.sequences[seq]?.map(f => f.hold) ?? [];
+
+const triggerRows = (store: MascotStore) => Object.entries(store.getState().doc.triggers);
+
+describe("moves and their steps", () => {
+  it("names a new move after its source and numbers repeats", () => {
+    const store = setup();
+    store.dispatch({ type: "add-seq", name: "Big Wave!" });
+    store.dispatch({ type: "add-seq", name: "big wave" });
+    store.dispatch({ type: "add-seq", name: "  " });
+    expect(Object.keys(store.getState().doc.sequences)).toEqual([
+      "bounce",
+      "big-wave",
+      "big-wave-2",
+      "move"
+    ]);
+    expect(store.getState().doc.sequences.move).toEqual([{ pose: "default", hold: 4 }]);
+  });
+
+  it("copies a move it starts from without sharing its steps", () => {
+    const store = setup();
+    store.dispatch({ type: "add-seq", name: "copy", from: "bounce" });
+    const { sequences } = store.getState().doc;
+    expect(sequences.copy).toEqual(sequences.bounce);
+    expect(sequences.copy?.[0]).not.toBe(sequences.bounce?.[0]);
+  });
+
+  it("edits, adds, moves, reorders and removes steps", () => {
+    const store = setup();
+    expect(holds(store)).toEqual([2, 3, 2, 3]);
+    store.dispatch({ type: "set-frame", seq: "bounce", index: 0, frame: { hold: 9 } });
+    store.dispatch({ type: "add-frame", seq: "bounce" });
+    expect(holds(store)).toEqual([9, 3, 2, 3, 4]);
+    store.dispatch({ type: "move-frame", seq: "bounce", index: 0, dir: 1 });
+    expect(holds(store)).toEqual([3, 9, 2, 3, 4]);
+    store.dispatch({ type: "reorder-frame", seq: "bounce", from: 4, to: 0 });
+    expect(holds(store)).toEqual([4, 3, 9, 2, 3]);
+    store.dispatch({ type: "remove-frame", seq: "bounce", index: 2 });
+    expect(holds(store)).toEqual([4, 3, 2, 3]);
+  });
+
+  it("ignores step edits that have nothing to do", () => {
+    const store = setup();
+    store.dispatch({ type: "add-seq", name: "one", frames: [{ pose: "default", hold: 1 }] });
+    const before = store.getState();
+    for (const action of [
+      { type: "set-frame", seq: "nope", index: 0, frame: { hold: 2 } },
+      { type: "add-frame", seq: "nope" },
+      { type: "remove-frame", seq: "one", index: 0 },
+      { type: "move-frame", seq: "bounce", index: 3, dir: 1 },
+      { type: "reorder-frame", seq: "bounce", from: 1, to: 1 },
+      { type: "reorder-frame", seq: "bounce", from: 0, to: 9 }
+    ] satisfies MascotAction[]) {
+      store.dispatch(action);
+    }
+    expect(store.getState()).toBe(before);
+  });
+
+  it("points steps at a renamed pose, and at default once a pose is deleted", () => {
+    const store = setup();
+    store.dispatch({ type: "add-pose", name: "tall" });
+    store.dispatch({ type: "set-frame", seq: "bounce", index: 1, frame: { pose: "tall" } });
+    store.dispatch({ type: "rename-pose", from: "tall", to: "stretch" });
+    expect(store.getState().doc.sequences.bounce?.[1]?.pose).toBe("stretch");
+    store.dispatch({ type: "delete-pose", name: "stretch" });
+    expect(store.getState().doc.sequences.bounce?.[1]?.pose).toBe("default");
+  });
+});
+
+describe("triggers", () => {
+  it("follow a renamed move, and go with a deleted one", () => {
+    const store = setup();
+    store.dispatch({ type: "add-seq", name: "wave" });
+    store.dispatch({ type: "add-trigger", seq: "bounce" });
+    store.dispatch({ type: "add-trigger", seq: "wave" });
+    expect(triggerRows(store)).toEqual([
+      ["click", "bounce"],
+      ["hover", "wave"]
+    ]);
+    store.dispatch({ type: "rename-seq", from: "bounce", to: "hop" });
+    expect(triggerRows(store)).toEqual([
+      ["click", "hop"],
+      ["hover", "wave"]
+    ]);
+    store.dispatch({ type: "delete-seq", name: "hop" });
+    expect(triggerRows(store)).toEqual([["hover", "wave"]]);
+    expect(store.getState().seqName).toBe("wave");
+  });
+
+  it("replace a row in place, refuse a taken key, and add a missing row at the end", () => {
+    const store = setup();
+    store.dispatch({ type: "add-trigger", seq: "bounce" });
+    store.dispatch({ type: "add-trigger", seq: "bounce" });
+    store.dispatch({ type: "replace-trigger", from: "click", to: "interval:6", seq: "bounce" });
+    expect(triggerRows(store)).toEqual([
+      ["interval:6", "bounce"],
+      ["hover", "bounce"]
+    ]);
+    const before = store.getState();
+    store.dispatch({ type: "replace-trigger", from: "hover", to: "interval:6", seq: "bounce" });
+    expect(store.getState()).toBe(before);
+    store.dispatch({ type: "replace-trigger", from: "gone", to: "load", seq: "bounce" });
+    expect(triggerRows(store).at(-1)).toEqual(["load", "bounce"]);
+  });
+});
