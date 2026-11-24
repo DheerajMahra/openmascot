@@ -11,12 +11,8 @@ import {
   EntityHeaderTitle,
   RenameAction
 } from "@/components/editor/entity-header";
-import {
-  toPoseName,
-  useEditorSelection,
-  useMascotDispatch,
-  useMascotSelector
-} from "@/lib/mascot-store";
+import { toPoseName } from "@/lib/doc-edits";
+import { useEditorSelection, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 
 /** "POSE · default" with rename and delete. The default pose can't be renamed or deleted. */
 export const PoseHeader = () => {

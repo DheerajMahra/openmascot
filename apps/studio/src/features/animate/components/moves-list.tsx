@@ -7,12 +7,8 @@ import { InfoTip } from "@/components/ui/info-tip";
 import { SectionLabel } from "@/components/ui/section-label";
 import { Separator } from "@/components/ui/separator";
 import { NewMoveMenu } from "@/features/animate/components/new-move-menu";
-import {
-  triggersFor,
-  useEditorSelection,
-  useMascotDispatch,
-  useMascotDoc
-} from "@/lib/mascot-store";
+import { triggersFor } from "@/lib/doc-edits";
+import { useEditorSelection, useMascotDispatch, useMascotDoc } from "@/lib/mascot-store";
 import { describeTriggers } from "@/lib/presets";
 
 const MOVES_HELP =

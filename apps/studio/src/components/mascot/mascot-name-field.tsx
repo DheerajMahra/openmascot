@@ -3,7 +3,8 @@
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { SectionLabel } from "@/components/ui/section-label";
-import { UNTITLED, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
+import { UNTITLED } from "@/lib/doc-edits";
+import { useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 
 /** "Mascot name" box at the top of each editor sidebar. Left blank, the mascot is called Untitled. */
 export const MascotNameField = () => {
