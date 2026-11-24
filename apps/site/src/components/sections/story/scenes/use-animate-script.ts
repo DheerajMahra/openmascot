@@ -6,6 +6,7 @@ import type { MascotDoc, MascotFrame } from "openmascot";
 import type { MascotElement } from "openmascot/react";
 import type { RefObject } from "react";
 
+import { holdTicks, sequenceTicks } from "openmascot";
 import { useState } from "react";
 
 import { MOSS } from "@/lib/mascots";
@@ -20,14 +21,12 @@ export const HOP: MascotFrame[] = [
 export const HOP_NAME = "hop-preset";
 export const SCENE_DOC: MascotDoc = { ...MOSS, sequences: { ...MOSS.sequences, [HOP_NAME]: HOP } };
 
-const ticks = (frames: MascotFrame[]) =>
-  frames.reduce((n, f) => n + Math.max(1, Math.floor(f.hold)), 0);
 /** Which row is on screen at each tick of the hop. */
-const ROW_AT_TICK = HOP.flatMap((f, row) => Array.from({ length: Math.max(1, f.hold) }, () => row));
+const ROW_AT_TICK = HOP.flatMap((f, row) => Array.from({ length: holdTicks(f) }, () => row));
 
 /** The move's length, in the studio's terms: poses, frames, seconds. */
 export const moveLength = (rows: number) => {
-  const frames = ticks(HOP.slice(0, rows));
+  const frames = sequenceTicks(HOP.slice(0, rows));
   return {
     poses: `${rows} pose${rows === 1 ? "" : "s"}`,
     frames: `${frames} frames`,
