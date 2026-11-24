@@ -1,6 +1,6 @@
 "use client";
 
-import type { Tool } from "@/lib/mascot-store";
+import type { Tool } from "@/lib/mascot-reducer";
 import type { LucideIcon } from "lucide-react";
 
 import {
