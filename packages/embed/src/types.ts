@@ -1,4 +1,7 @@
-/** One step of a sequence. `hold` is how many ticks the pose stays on screen. */
+/**
+ * One step of a sequence. `hold` is how many ticks the pose stays on screen, from 1 to MAX_HOLD
+ * (120); a value outside that range plays as the nearest end of it.
+ */
 export interface MascotFrame {
   pose: string;
   hold: number;

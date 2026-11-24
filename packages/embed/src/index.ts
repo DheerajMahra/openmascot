@@ -2,10 +2,19 @@ export { Animator, expandSequence } from "./animator";
 export { MASCOT_TAG, MascotElement, defineMascotElement, emit, play } from "./element";
 export type { MascotTarget } from "./element";
 export { MascotPlayer, prefersReducedMotion } from "./player";
-export { EMPTY_CELL, frameShift, poseToDataUrl, rasterizePose } from "./renderer";
+export {
+  DEFAULT_TICK,
+  EMPTY_CELL,
+  GRID,
+  MAX_COLORS,
+  MAX_HOLD,
+  holdTicks,
+  sequenceTicks
+} from "./format";
+export { frameShift, poseToDataUrl, rasterizePose } from "./renderer";
 export type { FrameShift } from "./renderer";
-export { parseTrigger } from "./triggers";
-export type { ParsedTrigger } from "./triggers";
+export { formatTrigger, parseTrigger } from "./triggers";
+export type { ParsedTrigger, TriggerType } from "./triggers";
 export type {
   MascotDoc,
   MascotFrame,

@@ -1,6 +1,6 @@
 import type { MascotDoc, MascotFrame } from "./types";
 
-export const EMPTY_CELL = ".";
+import { EMPTY_CELL } from "./format";
 
 const hexToRgb = (hex: string): [number, number, number] => [
   parseInt(hex.slice(1, 3), 16),

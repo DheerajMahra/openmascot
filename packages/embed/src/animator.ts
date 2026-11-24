@@ -1,12 +1,14 @@
 import type { MascotDoc, MascotFrame } from "./types";
 
+import { holdTicks } from "./format";
+
 export const REST_FRAME: MascotFrame = { pose: "default", hold: 1 };
 
 /** `{ pose, hold: 3 }` becomes three identical frames so playback is one index per tick. */
 export const expandSequence = (seq: MascotFrame[] | undefined): MascotFrame[] => {
   const frames: MascotFrame[] = [];
   for (const f of seq ?? []) {
-    const n = Math.max(1, Math.floor(f.hold) || 1);
+    const n = holdTicks(f);
     for (let i = 0; i < n; i++) frames.push(f);
   }
   return frames;
