@@ -83,6 +83,18 @@ describe("<open-mascot>", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
+  it("stays empty and warns when src is not a mascot document", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const fetch = respond({ id: "m_bad", palette: [] });
+    vi.stubGlobal("fetch", fetch);
+    const el = create({ src: "/bad.json" }, false);
+    await vi.waitFor(() => expect(warn).toHaveBeenCalled());
+
+    expect(el.player).toBeNull();
+    expect(el.querySelector("canvas")).toBeNull();
+    warn.mockRestore();
+  });
+
   it("resizes in place on a scale change", () => {
     const el = create({ scale: "2" });
     const player = el.player;

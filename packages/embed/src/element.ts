@@ -1,5 +1,6 @@
 import type { MascotDoc, MascotPosition } from "./types";
 
+import { parseMascotDoc } from "./parse";
 import { MascotPlayer } from "./player";
 
 export const MASCOT_TAG = "open-mascot";
@@ -27,7 +28,8 @@ export class MascotElement extends Base {
 
   private mounted: MascotPlayer | null = null;
   private docValue: MascotDoc | null = null;
-  private fetched: { src: string; doc: MascotDoc } | null = null;
+  /** The last `src` fetched and what it returned, checked or not. */
+  private fetched: { src: string; doc: unknown } | null = null;
   /** Bumped on every unmount so a fetch that lands late is dropped. */
   private loads = 0;
   /** Between connect and disconnect. Attribute callbacks during an upgrade come before it. */
@@ -139,7 +141,7 @@ export class MascotElement extends Base {
     fetch(src)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json() as Promise<MascotDoc>;
+        return r.json() as Promise<unknown>;
       })
       .then(doc => {
         this.fetched = { src, doc };
@@ -148,7 +150,13 @@ export class MascotElement extends Base {
       .catch((err: unknown) => console.warn("mascot: could not load", src, err));
   }
 
-  private start(doc: MascotDoc): void {
+  /** Mounts a player for `value`, or warns and stays empty when it isn't a mascot document. */
+  private start(value: unknown): void {
+    const doc = parseMascotDoc(value);
+    if (!doc) {
+      console.warn("mascot: not a mascot document", this.src ?? value);
+      return;
+    }
     this.mounted = new MascotPlayer(this, doc, {
       scale: this.scale,
       position: this.position,
