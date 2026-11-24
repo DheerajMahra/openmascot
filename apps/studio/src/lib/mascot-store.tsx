@@ -6,7 +6,7 @@ import type { MascotDoc, MascotFrame } from "openmascot";
 import type { ReactNode } from "react";
 
 import { clawd } from "@openmascot/samples";
-import { DEFAULT_TICK, GRID, MAX_COLORS } from "openmascot";
+import { MAX_COLORS } from "openmascot";
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
 import {
@@ -20,15 +20,7 @@ import {
   toMoveName
 } from "@/lib/doc-edits";
 import { mascotRepository } from "@/lib/local-mascot-repository";
-import {
-  blankPose,
-  floodFill,
-  newId,
-  normalizePose,
-  randomPaintColor,
-  setCell
-} from "@/lib/pose-utils";
-import { MOVE_PRESETS } from "@/lib/presets";
+import { blankPose, floodFill, normalizePose, setCell } from "@/lib/pose-utils";
 
 export type Tool = "pencil" | "mirror" | "eraser" | "fill";
 
@@ -111,23 +103,6 @@ export type MascotAction =
 
 const CLAWD = clawd;
 const MAX_HISTORY = 50;
-
-/** A blank mascot starts with Bounce, so whatever gets drawn has a move to try right away. */
-export const createBlankMascot = (): MascotDoc => {
-  const grid = { ...GRID };
-  const bounce = MOVE_PRESETS.find(p => p.id === "bounce")?.frames ?? [];
-  return {
-    id: newId(),
-    name: UNTITLED,
-    version: 1,
-    grid,
-    tick: DEFAULT_TICK,
-    palette: [randomPaintColor()],
-    poses: { default: blankPose(grid.w, grid.h) },
-    sequences: { bounce: bounce.map(f => ({ ...f })) },
-    triggers: {}
-  };
-};
 
 /** Clawd stands in until a mascot opens; nothing renders it while status is `loading`. */
 const initialState: MascotState = {

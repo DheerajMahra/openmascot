@@ -8,11 +8,11 @@ import {
   canRedo,
   canUndo,
   createAutosave,
-  createBlankMascot,
   createMascotStore,
   showsMascot
 } from "@/lib/mascot-store";
 import { cellAt, colorChar } from "@/lib/pose-utils";
+import { createBlankMascot } from "@/lib/samples";
 
 const W = 24;
 const INK = colorChar(1);
