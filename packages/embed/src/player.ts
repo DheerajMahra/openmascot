@@ -1,6 +1,7 @@
 import type { MascotDoc, MascotOptions } from "./types";
 
 import { Animator } from "./animator";
+import { DEFAULT_TICK } from "./format";
 import { Renderer } from "./renderer";
 import { TriggerManager } from "./triggers";
 
@@ -140,7 +141,7 @@ export class MascotPlayer {
       this.timer = null;
       this.animator.advance();
       this.step();
-    }, this.doc.tick || 60);
+    }, this.doc.tick || DEFAULT_TICK);
   }
 
   private draw(): void {

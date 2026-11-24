@@ -12,6 +12,16 @@ export const parseTrigger = (key: string): ParsedTrigger | null => {
   return null;
 };
 
+/** The kinds of event a trigger can listen for. */
+export type TriggerType = ParsedTrigger["type"];
+
+/** The key for a trigger: the inverse of `parseTrigger`. */
+export const formatTrigger = (trigger: ParsedTrigger): string => {
+  if (trigger.type === "interval") return `interval:${trigger.seconds}`;
+  if (trigger.type === "custom") return `custom:${trigger.name}`;
+  return trigger.type;
+};
+
 /** What a trigger needs from the player. */
 export interface TriggerHost {
   el: HTMLElement;

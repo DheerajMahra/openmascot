@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { TriggerManager, parseTrigger, type TriggerHost } from "./triggers";
+import { TriggerManager, formatTrigger, parseTrigger, type TriggerHost } from "./triggers";
 
 describe("parseTrigger", () => {
   it("parses the plain events", () => {
@@ -18,6 +18,15 @@ describe("parseTrigger", () => {
     expect(parseTrigger("custom:win")).toEqual({ type: "custom", name: "win" });
     expect(parseTrigger("nope")).toBeNull();
     expect(parseTrigger("idle")).toBeNull();
+  });
+});
+
+describe("formatTrigger", () => {
+  it("builds the key parseTrigger reads back", () => {
+    for (const key of ["load", "click", "hover", "interval:30", "interval:1.5", "custom:win"]) {
+      const parsed = parseTrigger(key);
+      expect(parsed && formatTrigger(parsed)).toBe(key);
+    }
   });
 });
 

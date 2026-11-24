@@ -32,6 +32,11 @@ describe("expandSequence", () => {
     expect(expandSequence([{ pose: "a", hold: 0 }])).toHaveLength(1);
     expect(expandSequence(undefined)).toEqual([]);
   });
+
+  it("stops at 120 ticks a step, even for a hold JSON reads as Infinity", () => {
+    const frames = JSON.parse('[{ "pose": "a", "hold": 1e309 }, { "pose": "b", "hold": 1e9 }]');
+    expect(expandSequence(frames)).toHaveLength(240);
+  });
 });
 
 describe("Animator", () => {
