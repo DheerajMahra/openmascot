@@ -31,6 +31,33 @@ export const omitKey = <T>(obj: Record<string, T>, key: string): Record<string, 
   return out;
 };
 
+/** Every step that shows pose `from` shows `to` instead. */
+export const repointPose = (
+  sequences: MascotDoc["sequences"],
+  from: string,
+  to: string
+): MascotDoc["sequences"] => {
+  const out: MascotDoc["sequences"] = {};
+  for (const [name, frames] of Object.entries(sequences)) {
+    out[name] = frames.map(f => (f.pose === from ? { ...f, pose: to } : f));
+  }
+  return out;
+};
+
+/** Every trigger that plays move `from` plays `to` instead, or is dropped when `to` is null. */
+export const repointTriggers = (
+  triggers: MascotDoc["triggers"],
+  from: string,
+  to: string | null
+): MascotDoc["triggers"] => {
+  const out: MascotDoc["triggers"] = {};
+  for (const [key, seq] of Object.entries(triggers)) {
+    if (seq !== from) out[key] = seq;
+    else if (to !== null) out[key] = to;
+  }
+  return out;
+};
+
 /** A move name as stored: lower case letters and digits joined by single "-". */
 export const toMoveName = (name: string): string =>
   name
