@@ -13,12 +13,8 @@ import {
   EntityHeaderTitle,
   RenameAction
 } from "@/components/editor/entity-header";
-import {
-  toMoveName,
-  useEditorSelection,
-  useMascotDispatch,
-  useMascotSelector
-} from "@/lib/mascot-store";
+import { toMoveName } from "@/lib/doc-edits";
+import { useEditorSelection, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 import { secondsOf } from "@/lib/presets";
 
 /** "MOVE · wave" with rename, delete, and the move's length. The last move can't be deleted. */

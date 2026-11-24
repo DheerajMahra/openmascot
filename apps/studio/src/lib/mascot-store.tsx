@@ -2,13 +2,23 @@
 
 import type { MascotRepository } from "@/lib/mascot-repository";
 import type { StartFrom } from "@/lib/samples";
-import type { MascotDoc, MascotFrame, TriggerType } from "openmascot";
+import type { MascotDoc, MascotFrame } from "openmascot";
 import type { ReactNode } from "react";
 
 import { clawd } from "@openmascot/samples";
 import { DEFAULT_TICK, GRID, MAX_COLORS } from "openmascot";
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
+import {
+  UNTITLED,
+  firstSeq,
+  freeTriggerKey,
+  nextPoseName,
+  omitKey,
+  renameKey,
+  toPoseName,
+  toMoveName
+} from "@/lib/doc-edits";
 import { mascotRepository } from "@/lib/local-mascot-repository";
 import {
   blankPose,
@@ -18,7 +28,7 @@ import {
   randomPaintColor,
   setCell
 } from "@/lib/pose-utils";
-import { MOVE_PRESETS, buildTrigger, uniqueTrigger } from "@/lib/presets";
+import { MOVE_PRESETS } from "@/lib/presets";
 
 export type Tool = "pencil" | "mirror" | "eraser" | "fill";
 
@@ -101,8 +111,6 @@ export type MascotAction =
 
 const CLAWD = clawd;
 const MAX_HISTORY = 50;
-/** What a mascot is called when its name is empty or only spaces. */
-export const UNTITLED = "Untitled";
 
 /** A blank mascot starts with Bounce, so whatever gets drawn has a move to try right away. */
 export const createBlankMascot = (): MascotDoc => {
@@ -120,8 +128,6 @@ export const createBlankMascot = (): MascotDoc => {
     triggers: {}
   };
 };
-
-const firstSeq = (doc: MascotDoc): string => Object.keys(doc.sequences)[0] ?? "";
 
 /** Clawd stands in until a mascot opens; nothing renders it while status is `loading`. */
 const initialState: MascotState = {
@@ -196,66 +202,12 @@ const applyEdit = (s: MascotState, edit: MascotEdit, value: string): MascotState
   };
 };
 
-const renameKey = <T,>(obj: Record<string, T>, from: string, to: string): Record<string, T> => {
-  const out: Record<string, T> = {};
-  for (const [k, v] of Object.entries(obj)) out[k === from ? to : k] = v;
-  return out;
-};
-
-const omitKey = <T,>(obj: Record<string, T>, key: string): Record<string, T> => {
-  const out = { ...obj };
-  delete out[key];
-  return out;
-};
-
 /**
  * A name left blank (say, the page closed mid-edit) reads as Untitled once the mascot opens again.
  * Format migrations happen earlier, in the runtime's parseMascotDoc, as the library reads a doc.
  */
 const withName = (doc: MascotDoc): MascotDoc =>
   doc.name.trim() ? doc : { ...doc, name: UNTITLED };
-
-/** A move name as stored: lower case letters and digits joined by single "-". */
-export const toMoveName = (name: string): string =>
-  name
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-
-/** A pose name as stored: lower case letters, digits, single spaces, "-" and "_", at most 32 characters. */
-export const toPoseName = (name: string): string =>
-  name
-    .toLowerCase()
-    .replace(/[^a-z0-9 _-]+/g, "")
-    .replace(/\s+/g, " ")
-    .slice(0, 32)
-    .replace(/^[\s_-]+|[\s_-]+$/g, "");
-
-/** "wave 1" for a pose made from "wave" (or from "wave 3"), or the next number up if that is taken. */
-export const nextPoseName = (poses: Record<string, string>, from = "default"): string => {
-  const base = from.replace(/ \d+$/, "").slice(0, 27) || "default";
-  let n = 1;
-  while (`${base} ${n}` in poses) n++;
-  return `${base} ${n}`;
-};
-
-/** Every trigger key that plays this sequence, in table order. */
-export const triggersFor = (doc: MascotDoc, seq: string): string[] =>
-  Object.entries(doc.triggers)
-    .filter(([, value]) => value === seq)
-    .map(([key]) => key);
-
-/** Trigger kinds a new row can take, tried in order until one is free. */
-const TRIGGER_DEFAULTS: TriggerType[] = ["click", "hover", "load", "interval"];
-
-const freeTriggerKey = (triggers: Record<string, string>): string => {
-  for (const kind of TRIGGER_DEFAULTS) {
-    const key = buildTrigger(kind, "");
-    if (!(key in triggers)) return key;
-  }
-  return uniqueTrigger("custom", triggers);
-};
 
 /** A freshly opened mascot: its default pose and first move selected, no undo history. */
 const opened = (s: MascotState, doc: MascotDoc): MascotState => {

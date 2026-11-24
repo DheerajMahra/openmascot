@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { IconButton } from "@/components/ui/icon-button";
 import { timeAgo } from "@/features/start/lib/time-ago";
-import { UNTITLED } from "@/lib/mascot-store";
+import { UNTITLED } from "@/lib/doc-edits";
 
 /**
  * One saved mascot on the Start page. The whole row opens it (the name's link stretches over the
