@@ -12,11 +12,14 @@ import {
   nextPoseName,
   omitKey,
   renameKey,
+  repointPose,
+  repointTriggers,
   toMoveName,
   toPoseName
 } from "@/lib/doc-edits";
 import { dropPoseEdits, record, renamePoseEdits, takeRedo, takeUndo } from "@/lib/edit-history";
 import { blankPose, floodFill, normalizePose, setCell } from "@/lib/pose-utils";
+import { DEFAULT_HOLD } from "@/lib/presets";
 
 /*
  * The editor's state and the pure reducer that changes it. No React and no storage: the store in
@@ -155,6 +158,20 @@ const opened = (s: MascotState, doc: MascotDoc): MascotState => {
   };
 };
 
+/**
+ * Changes one move's steps. A move that doesn't exist, or a change that returns null (nothing to
+ * do), leaves the state exactly as it was, so nothing re-renders or saves.
+ */
+const withFrames = (
+  s: MascotState,
+  seq: string,
+  change: (frames: MascotFrame[]) => MascotFrame[] | null
+): MascotState => {
+  const frames = s.doc.sequences[seq];
+  const next = frames && change(frames);
+  return next ? { ...s, doc: { ...s.doc, sequences: { ...s.doc.sequences, [seq]: next } } } : s;
+};
+
 export const reducer = (s: MascotState, a: MascotAction): MascotState => {
   const { doc } = s;
   const { w, h } = doc.grid;
@@ -225,10 +242,7 @@ export const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "rename-pose": {
       const to = toPoseName(a.to);
       if (!to || to in doc.poses || a.from === "default") return s;
-      const sequences: MascotDoc["sequences"] = {};
-      for (const [k, seq] of Object.entries(doc.sequences)) {
-        sequences[k] = seq.map(f => (f.pose === a.from ? { ...f, pose: to } : f));
-      }
+      const sequences = repointPose(doc.sequences, a.from, to);
       return {
         ...s,
         doc: { ...doc, poses: renameKey(doc.poses, a.from, to), sequences },
@@ -238,10 +252,7 @@ export const reducer = (s: MascotState, a: MascotAction): MascotState => {
     }
     case "delete-pose": {
       if (a.name === "default") return s;
-      const sequences: MascotDoc["sequences"] = {};
-      for (const [k, seq] of Object.entries(doc.sequences)) {
-        sequences[k] = seq.map(f => (f.pose === a.name ? { ...f, pose: "default" } : f));
-      }
+      const sequences = repointPose(doc.sequences, a.name, "default");
       return {
         ...s,
         doc: { ...doc, poses: omitKey(doc.poses, a.name), sequences },
@@ -258,14 +269,13 @@ export const reducer = (s: MascotState, a: MascotAction): MascotState => {
       return step ? { ...applyEdit(s, step.edit, step.edit.after), ...step.stacks } : s;
     }
     case "add-seq": {
-      let name = toMoveName(a.name) || "move";
-      let n = 2;
-      while (name in doc.sequences) name = `${toMoveName(a.name) || "move"}-${n++}`;
-      const frames = a.frames
-        ? a.frames.map(f => ({ ...f }))
-        : a.from
-          ? (doc.sequences[a.from] ?? []).map(f => ({ ...f }))
-          : [{ pose: "default", hold: 4 }];
+      const base = toMoveName(a.name) || "move";
+      let name = base;
+      for (let n = 2; name in doc.sequences; n++) name = `${base}-${n}`;
+      let frames: MascotFrame[];
+      if (a.frames) frames = a.frames.map(f => ({ ...f }));
+      else if (a.from) frames = (doc.sequences[a.from] ?? []).map(f => ({ ...f }));
+      else frames = [{ pose: "default", hold: DEFAULT_HOLD }];
       return {
         ...s,
         doc: { ...doc, sequences: { ...doc.sequences, [name]: frames } },
@@ -275,8 +285,7 @@ export const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "rename-seq": {
       const to = toMoveName(a.to);
       if (!to || to === a.from || to in doc.sequences) return s;
-      const triggers: MascotDoc["triggers"] = {};
-      for (const [k, v] of Object.entries(doc.triggers)) triggers[k] = v === a.from ? to : v;
+      const triggers = repointTriggers(doc.triggers, a.from, to);
       return {
         ...s,
         doc: { ...doc, sequences: renameKey(doc.sequences, a.from, to), triggers },
@@ -286,8 +295,7 @@ export const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "delete-seq": {
       // A mascot keeps at least one move, the way a move keeps at least one step.
       if (!(a.name in doc.sequences) || Object.keys(doc.sequences).length <= 1) return s;
-      const triggers: MascotDoc["triggers"] = {};
-      for (const [k, v] of Object.entries(doc.triggers)) if (v !== a.name) triggers[k] = v;
+      const triggers = repointTriggers(doc.triggers, a.name, null);
       const sequences = omitKey(doc.sequences, a.name);
       return {
         ...s,
@@ -295,46 +303,39 @@ export const reducer = (s: MascotState, a: MascotAction): MascotState => {
         seqName: s.seqName === a.name ? firstSeq({ ...doc, sequences }) : s.seqName
       };
     }
-    case "set-frame": {
-      const seq = doc.sequences[a.seq];
-      if (!seq) return s;
-      const frames = seq.map((f, i) => (i === a.index ? { ...f, ...a.frame } : f));
-      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
-    }
-    case "add-frame": {
-      const seq = doc.sequences[a.seq];
-      if (!seq) return s;
-      const last = seq[seq.length - 1];
-      const frames = [...seq, a.frame ?? { pose: last?.pose ?? "default", hold: 4 }];
-      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
-    }
-    case "remove-frame": {
-      const seq = doc.sequences[a.seq];
-      if (!seq || seq.length <= 1) return s;
-      const frames = seq.filter((_, i) => i !== a.index);
-      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
-    }
-    case "move-frame": {
-      const seq = doc.sequences[a.seq];
-      if (!seq) return s;
-      const j = a.index + a.dir;
-      const current = seq[a.index];
-      const other = seq[j];
-      if (!current || !other) return s;
-      const frames = seq.slice();
-      frames[a.index] = other;
-      frames[j] = current;
-      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
-    }
-    case "reorder-frame": {
-      const seq = doc.sequences[a.seq];
-      if (!seq || a.from === a.to) return s;
-      const moving = seq[a.from];
-      if (!moving || a.to < 0 || a.to >= seq.length) return s;
-      const frames = seq.filter((_, i) => i !== a.from);
-      frames.splice(a.to, 0, moving);
-      return { ...s, doc: { ...doc, sequences: { ...doc.sequences, [a.seq]: frames } } };
-    }
+    case "set-frame":
+      return withFrames(s, a.seq, frames =>
+        frames.map((f, i) => (i === a.index ? { ...f, ...a.frame } : f))
+      );
+    case "add-frame":
+      return withFrames(s, a.seq, frames => {
+        const last = frames[frames.length - 1];
+        return [...frames, a.frame ?? { pose: last?.pose ?? "default", hold: DEFAULT_HOLD }];
+      });
+    case "remove-frame":
+      // A move keeps at least one step.
+      return withFrames(s, a.seq, frames =>
+        frames.length > 1 ? frames.filter((_, i) => i !== a.index) : null
+      );
+    case "move-frame":
+      return withFrames(s, a.seq, frames => {
+        const j = a.index + a.dir;
+        const current = frames[a.index];
+        const other = frames[j];
+        if (!current || !other) return null;
+        const next = frames.slice();
+        next[a.index] = other;
+        next[j] = current;
+        return next;
+      });
+    case "reorder-frame":
+      return withFrames(s, a.seq, frames => {
+        const moving = frames[a.from];
+        if (a.from === a.to || !moving || a.to < 0 || a.to >= frames.length) return null;
+        const next = frames.filter((_, i) => i !== a.from);
+        next.splice(a.to, 0, moving);
+        return next;
+      });
     case "add-trigger": {
       if (!(a.seq in doc.sequences)) return s;
       const key = freeTriggerKey(doc.triggers);
@@ -343,15 +344,8 @@ export const reducer = (s: MascotState, a: MascotAction): MascotState => {
     case "replace-trigger": {
       // Keys are unique, so a row can't take a "when" another row already has.
       if (a.to !== a.from && a.to in doc.triggers) return s;
-      const triggers: MascotDoc["triggers"] = {};
-      let found = false;
-      for (const [k, v] of Object.entries(doc.triggers)) {
-        if (k === a.from) {
-          triggers[a.to] = a.seq;
-          found = true;
-        } else triggers[k] = v;
-      }
-      if (!found) triggers[a.to] = a.seq;
+      // Takes the old row's place in the table, or joins the end if there was no old row.
+      const triggers = { ...renameKey(doc.triggers, a.from, a.to), [a.to]: a.seq };
       return { ...s, doc: { ...doc, triggers } };
     }
     case "remove-trigger":
