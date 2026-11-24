@@ -1,5 +1,6 @@
 "use client";
 
+import { sequenceTicks } from "openmascot";
 import { useRef, useState } from "react";
 import { flushSync } from "react-dom";
 
@@ -18,7 +19,7 @@ import {
   useMascotDispatch,
   useMascotSelector
 } from "@/lib/mascot-store";
-import { secondsOf, ticksOf } from "@/lib/presets";
+import { secondsOf } from "@/lib/presets";
 
 /** "MOVE · wave" with rename, delete, and the move's length. The last move can't be deleted. */
 export const MoveHeader = () => {
@@ -80,7 +81,7 @@ export const MoveHeader = () => {
         </>
       )}
       <EntityHeaderMeta>
-        {frames.length} pose{frames.length === 1 ? "" : "s"} · {ticksOf(frames)} frames ·{" "}
+        {frames.length} pose{frames.length === 1 ? "" : "s"} · {sequenceTicks(frames)} frames ·{" "}
         {secondsOf(frames, tick)} s
       </EntityHeaderMeta>
     </EntityHeader>

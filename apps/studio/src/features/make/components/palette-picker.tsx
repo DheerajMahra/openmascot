@@ -3,15 +3,11 @@
 import type { MouseEvent } from "react";
 
 import { PlusIcon } from "lucide-react";
+import { MAX_COLORS } from "openmascot";
 import { useRef } from "react";
 
 import { SectionLabel } from "@/components/ui/section-label";
-import {
-  MAX_COLORS,
-  useEditorTool,
-  useMascotDispatch,
-  useMascotSelector
-} from "@/lib/mascot-store";
+import { useEditorTool, useMascotDispatch, useMascotSelector } from "@/lib/mascot-store";
 import { cn } from "@/lib/utils";
 
 const ADD_START = "#ffffff";

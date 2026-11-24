@@ -4,6 +4,7 @@ import type { MascotDoc, MascotFrame } from "openmascot";
 import type { HTMLAttributes } from "react";
 
 import { GripVerticalIcon, XIcon } from "lucide-react";
+import { MAX_HOLD, holdTicks } from "openmascot";
 
 import { MascotStage } from "@/components/mascot/mascot-stage";
 import { MascotThumb } from "@/components/mascot/mascot-thumb";
@@ -17,7 +18,6 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { holdOf } from "@/features/animate/lib/timeline";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -112,8 +112,8 @@ export const StepRow = ({
       <NumberInput
         label={`Hold pose ${n}, in frames`}
         min={1}
-        max={120}
-        value={holdOf(frame)}
+        max={MAX_HOLD}
+        value={holdTicks(frame)}
         onChange={hold => onChange({ hold })}
       />
       <NumberInput

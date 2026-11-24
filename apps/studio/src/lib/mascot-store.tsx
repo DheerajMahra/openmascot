@@ -1,12 +1,12 @@
 "use client";
 
 import type { MascotRepository } from "@/lib/mascot-repository";
-import type { TriggerKind } from "@/lib/presets";
 import type { StartFrom } from "@/lib/samples";
-import type { MascotDoc, MascotFrame } from "openmascot";
+import type { MascotDoc, MascotFrame, TriggerType } from "openmascot";
 import type { ReactNode } from "react";
 
 import { clawd } from "@openmascot/samples";
+import { DEFAULT_TICK, GRID, MAX_COLORS } from "openmascot";
 import { createContext, useContext, useEffect, useState, useSyncExternalStore } from "react";
 
 import { mascotRepository } from "@/lib/local-mascot-repository";
@@ -101,21 +101,19 @@ export type MascotAction =
 
 const CLAWD = clawd;
 const MAX_HISTORY = 50;
-/** Pose cells hold one base-36 character per palette index. */
-export const MAX_COLORS = 36;
 /** What a mascot is called when its name is empty or only spaces. */
 export const UNTITLED = "Untitled";
 
 /** A blank mascot starts with Bounce, so whatever gets drawn has a move to try right away. */
 export const createBlankMascot = (): MascotDoc => {
-  const grid = { w: 24, h: 16 };
+  const grid = { ...GRID };
   const bounce = MOVE_PRESETS.find(p => p.id === "bounce")?.frames ?? [];
   return {
     id: newId(),
     name: UNTITLED,
     version: 1,
     grid,
-    tick: 60,
+    tick: DEFAULT_TICK,
     palette: [randomPaintColor()],
     poses: { default: blankPose(grid.w, grid.h) },
     sequences: { bounce: bounce.map(f => ({ ...f })) },
@@ -253,7 +251,7 @@ export const triggersFor = (doc: MascotDoc, seq: string): string[] =>
     .map(([key]) => key);
 
 /** Trigger kinds a new row can take, tried in order until one is free. */
-const TRIGGER_DEFAULTS: TriggerKind[] = ["click", "hover", "load", "interval"];
+const TRIGGER_DEFAULTS: TriggerType[] = ["click", "hover", "load", "interval"];
 
 const freeTriggerKey = (triggers: Record<string, string>): string => {
   for (const kind of TRIGGER_DEFAULTS) {
